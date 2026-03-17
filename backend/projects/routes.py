@@ -1,0 +1,48 @@
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from database import get_db
+from projects import schemas, service
+from auth.service import get_current_user
+from auth.schemas import UserOut
+
+router = APIRouter()
+
+@router.post("", response_model=schemas.ProjectOut, status_code=status.HTTP_201_CREATED)
+async def create_project(
+    project: schemas.ProjectCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'client':
+        raise HTTPException(status_code=403, detail="Only clients can create projects.")
+    return await service.create_project(db=db, project=project, client_id=current_user.user_id)
+
+@router.get("", response_model=List[schemas.ProjectOut])
+async def list_my_projects(
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    return await service.get_projects(db=db, user_id=current_user.user_id)
+
+@router.post("/{project_id}/submit-work", response_model=schemas.ProjectOut)
+async def submit_work(
+    project_id: int,
+    submission: schemas.WorkSubmission,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'freelancer':
+        raise HTTPException(status_code=403, detail="Only freelancers can submit work.")
+    return await service.submit_work(db=db, project_id=project_id, submission=submission, freelancer_id=current_user.user_id)
+
+@router.put("/{project_id}/approve", response_model=schemas.ProjectOut)
+async def approve_work(
+    project_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'client':
+        raise HTTPException(status_code=403, detail="Only clients can approve work.")
+    return await service.approve_work(db=db, project_id=project_id, client_id=current_user.user_id)

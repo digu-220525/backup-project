@@ -1,0 +1,380 @@
+import React, { useState, useContext, useEffect, useRef } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
+
+/* ─── tiny keyframes injected once ─── */
+const STYLES = `
+@keyframes fadeUp   { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+@keyframes shimmer  { from { transform:translateX(-100%) skewX(-12deg); } to { transform:translateX(220%) skewX(-12deg); } }
+@keyframes barSlide { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@keyframes pulse    { 0%,100%{ opacity:.6; } 50%{ opacity:1; } }
+`;
+
+const SignupPage = () => {
+  const [searchParams] = useSearchParams();
+  const initialRole = searchParams.get('role') === 'freelancer' ? 'freelancer' : 'client';
+
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: initialRole, bio: '', skills: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0);   // animation step 0=hidden,1=visible
+  const [roleAnim, setRoleAnim] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const { register } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setStep(1), 80);
+    return () => clearTimeout(t);
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
+  };
+
+  const switchRole = (role) => {
+    if (role === formData.role) return;
+    setRoleAnim(true);
+    setTimeout(() => { setFormData(f => ({ ...f, role })); setRoleAnim(false); }, 240);
+  };
+
+  const validate = () => {
+    const e = {};
+    if (!formData.name.trim() || formData.name.trim().length < 2)
+      e.name = 'At least 2 characters required.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      e.email = 'Enter a valid email address.';
+    if (!formData.password || formData.password.length < 6)
+      e.password = 'Minimum 6 characters.';
+    return e;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setLoading(true); setErrors({});
+    try {
+      await register(formData);
+      setSubmitSuccess(true);
+      setTimeout(() => navigate('/dashboard'), 800);
+    } catch (err) {
+      const d = err.response?.data?.detail;
+      setErrors({ general: typeof d === 'string' ? d : Array.isArray(d) ? d[0].msg : 'Error creating account. Try again.' });
+    } finally { setLoading(false); }
+  };
+
+  const isFL = formData.role === 'freelancer';
+
+  /* ── Accent tokens per role ── */
+  const A = isFL ? {
+    topBar: 'linear-gradient(90deg,#059669,#10b981,#34d399,#10b981,#059669)',
+    btnGrad: 'linear-gradient(135deg,#059669 0%,#10b981 60%,#34d399 100%)',
+    btnShd: '0 0 0 1px rgba(16,185,129,0.30), 0 10px 28px rgba(16,185,129,0.38)',
+    pillOn: 'linear-gradient(135deg,#059669,#10b981)',
+    pillShd: '0 4px 14px rgba(16,185,129,0.40)',
+    fBdr: '1px solid rgba(52,211,153,0.60)',
+    fBg: 'rgba(16,185,129,0.07)',
+    fShdw: '0 0 0 3px rgba(16,185,129,0.11)',
+    iconFoc: '#34d399',
+    linkCls: 'text-emerald-400 hover:text-emerald-300',
+    orbClr: 'rgba(16,185,129,0.09)',
+    btnColor: '#030f09',
+    spinCls: 'border-[#030f09]/20 border-t-[#030f09]',
+    labelClr: 'rgba(52,211,153,0.60)',
+    checkClr: 'text-emerald-400',
+    roleBg: 'rgba(16,185,129,0.08)',
+    roleBdr: '1px solid rgba(16,185,129,0.18)',
+  } : {
+    topBar: 'linear-gradient(90deg,#4f46e5,#6366f1,#818cf8,#6366f1,#4f46e5)',
+    btnGrad: 'linear-gradient(135deg,#4f46e5 0%,#6366f1 60%,#818cf8 100%)',
+    btnShd: '0 0 0 1px rgba(99,102,241,0.30), 0 10px 28px rgba(99,102,241,0.38)',
+    pillOn: 'linear-gradient(135deg,#4f46e5,#6366f1)',
+    pillShd: '0 4px 14px rgba(99,102,241,0.40)',
+    fBdr: '1px solid rgba(129,140,248,0.60)',
+    fBg: 'rgba(99,102,241,0.07)',
+    fShdw: '0 0 0 3px rgba(99,102,241,0.11)',
+    iconFoc: '#818cf8',
+    linkCls: 'text-indigo-400 hover:text-indigo-300',
+    orbClr: 'rgba(99,102,241,0.11)',
+    btnColor: '#ffffff',
+    spinCls: 'border-white/20 border-t-white',
+    labelClr: 'rgba(129,140,248,0.70)',
+    checkClr: 'text-indigo-400',
+    roleBg: 'rgba(99,102,241,0.08)',
+    roleBdr: '1px solid rgba(99,102,241,0.18)',
+  };
+
+  /* ── Input style helpers ── */
+  const iBase = { background: 'rgba(255,255,255,0.052)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '12px', color: '#fff', width: '100%', outline: 'none', transition: 'all .2s ease', padding: '13px 16px 13px 44px', fontSize: '14px', fontWeight: 500 };
+  const iPlain = { ...iBase, paddingLeft: '16px' };  // no icon
+  const onFocusIn = e => { e.target.style.background = A.fBg; e.target.style.border = A.fBdr; e.target.style.boxShadow = A.fShdw; };
+  const onFocusOut = e => { e.target.style.background = 'rgba(255,255,255,0.052)'; e.target.style.border = '1px solid rgba(255,255,255,0.10)'; e.target.style.boxShadow = 'none'; };
+
+  /* ── Stagger helper ── */
+  const stagger = (i) => ({
+    opacity: step ? 1 : 0,
+    transform: step ? 'translateY(0)' : 'translateY(14px)',
+    transition: `opacity .55s ease ${0.06 * i}s, transform .55s cubic-bezier(.16,1,.3,1) ${0.06 * i}s`,
+  });
+
+  const LABEL_STYLE = { display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '.25em', textTransform: 'uppercase', color: A.labelClr, marginBottom: '7px' };
+  const ERR = ({ msg }) => msg ? <p style={{ marginTop: '5px', fontSize: '11px', color: '#f87171', fontWeight: 500 }}>{msg}</p> : null;
+
+  return (
+    <>
+      <style>{STYLES}</style>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', position: 'relative', overflow: 'hidden', background: '#06091a' }}>
+
+        {/* ── HD background photo ── */}
+        <img
+          key={isFL ? 'fl' : 'cl'}
+          src={isFL
+            ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1920&q=95&auto=format&fit=crop&crop=center'
+            : 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1920&q=95&auto=format&fit=crop&crop=center'
+          }
+          alt=""
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 40%',
+            filter: 'brightness(0.30) saturate(1.1) contrast(1.1)',
+            opacity: roleAnim ? 0 : 1, transition: 'opacity .55s ease',
+          }}
+          onError={e => { e.target.src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=95&auto=format&fit=crop'; }}
+        />
+
+        {/* Dark + accent gradient overlay */}
+        <div style={{
+          position: 'absolute', inset: 0, transition: 'background .6s ease', background: isFL
+            ? 'linear-gradient(135deg,rgba(3,10,18,.78) 0%,rgba(4,16,24,.60) 50%,rgba(3,10,18,.76) 100%)'
+            : 'linear-gradient(135deg,rgba(6,9,26,.78) 0%,rgba(13,17,48,.60) 50%,rgba(6,9,26,.76) 100%)'
+        }} />
+        {/* Radial color orb — role-aware */}
+        <div style={{ position: 'absolute', inset: 0, transition: 'background .7s ease', background: `radial-gradient(ellipse at 50% 50%,${A.orbClr} 0%,transparent 62%)` }} />
+
+        {/* ── Card wrapper ── */}
+        <div ref={cardRef} style={{
+          position: 'relative', zIndex: 10, width: '100%', maxWidth: '640px',
+          opacity: step ? 1 : 0,
+          transform: step ? 'translateY(0) scale(1)' : 'translateY(32px) scale(0.96)',
+          transition: 'opacity .65s cubic-bezier(.16,1,.3,1), transform .65s cubic-bezier(.16,1,.3,1)',
+        }}>
+
+          {/* ── Logo above card ── */}
+          <div style={{ ...stagger(1), display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '22px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background .5s ease, box-shadow .5s ease', background: A.pillOn, boxShadow: A.pillShd }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+              </svg>
+            </div>
+            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 900, fontSize: '18px', color: '#fff', letterSpacing: '-.02em' }}>VantagePoint</span>
+          </div>
+
+          {/* ── Glass card ── */}
+          <div style={{
+            borderRadius: '24px', overflow: 'hidden',
+            background: 'rgba(7,11,30,0.88)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}>
+
+            <div style={{ padding: '36px 40px 40px' }}>
+
+              {/* Heading */}
+              <div style={{ ...stagger(2), textAlign: 'center', marginBottom: '28px' }}>
+                <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 900, fontSize: '26px', color: '#fff', letterSpacing: '-.03em', marginBottom: '6px', transition: 'all .3s ease' }}>
+                  {isFL ? 'Start freelancing 🚀' : 'Hire top talent 🎯'}
+                </h1>
+                <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '14px', fontWeight: 500 }}>
+                  Create your free account — no credit card needed
+                </p>
+              </div>
+
+              {/* Role toggle */}
+              <div style={{ ...stagger(3), display: 'flex', gap: '6px', padding: '5px', borderRadius: '14px', marginBottom: '24px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                {['client', 'freelancer'].map(role => {
+                  const active = formData.role === role;
+                  return (
+                    <button key={role} type="button" onClick={() => switchRole(role)}
+                      style={{
+                        flex: 1, padding: '11px 0', fontSize: '12px', fontWeight: 700, borderRadius: '10px', border: 'none', cursor: 'pointer',
+                        letterSpacing: '.06em', textTransform: 'uppercase', position: 'relative', overflow: 'hidden',
+                        transition: 'all .35s cubic-bezier(.16,1,.3,1)',
+                        background: active ? A.pillOn : 'transparent',
+                        color: active ? (isFL ? '#030f09' : '#fff') : 'rgba(255,255,255,0.28)',
+                        boxShadow: active ? A.pillShd : 'none',
+                      }}>
+                      {active && <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)', animation: 'shimmer .6s ease', pointerEvents: 'none' }} />}
+                      {role === 'client' ? "I'm a Client" : "I'm a Freelancer"}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Google SSO */}
+              <div style={stagger(4)}>
+                <button type="button"
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    padding: '13px 0', borderRadius: '12px', fontSize: '14px', fontWeight: 600,
+                    color: 'rgba(255,255,255,0.82)', cursor: 'pointer', transition: 'all .2s ease', marginBottom: '22px',
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.11)',
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; }}
+                  onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.11)'; }}>
+                  <svg width="18" height="18" viewBox="0 0 48 48">
+                    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+                    <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+                    <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+                    <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+                  </svg>
+                  Continue with Google
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div style={{ ...stagger(5), display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.22)', fontWeight: 500, whiteSpace: 'nowrap' }}>or sign up with email</span>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+              </div>
+
+              {/* General error */}
+              {errors.general && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', marginBottom: '18px', background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.24)', animation: 'fadeIn .3s ease' }}>
+                  <AlertCircle size={15} color="#f87171" style={{ flexShrink: 0 }} />
+                  <p style={{ fontSize: '13px', color: '#f87171', fontWeight: 500 }}>{errors.general}</p>
+                </div>
+              )}
+
+              {/* Form — fades on role switch */}
+              <form onSubmit={handleSubmit} noValidate
+                style={{ opacity: roleAnim ? 0 : 1, transform: roleAnim ? 'translateY(6px)' : 'none', transition: 'opacity .24s ease,transform .24s ease' }}>
+
+                {/* Row 1: Name + Email */}
+                <div style={{ ...stagger(6), display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                  <div>
+                    <label style={LABEL_STYLE}>Full Name</label>
+                    <div style={{ position: 'relative' }}>
+                      <User size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none', transition: 'color .2s' }} />
+                      <input name="name" type="text" value={formData.name} onChange={handleChange}
+                        placeholder="Your full name" style={iBase} onFocus={onFocusIn} onBlur={onFocusOut}
+                        onMouseOver={e => e.target.style.borderColor = 'rgba(255,255,255,0.18)'}
+                        onMouseOut={e => { if (document.activeElement !== e.target) e.target.style.borderColor = 'rgba(255,255,255,0.10)'; }}
+                      />
+                    </div>
+                    <ERR msg={errors.name} />
+                  </div>
+                  <div>
+                    <label style={LABEL_STYLE}>Email Address</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+                      <input name="email" type="email" value={formData.email} onChange={handleChange}
+                        placeholder="you@example.com" style={iBase} onFocus={onFocusIn} onBlur={onFocusOut}
+                        onMouseOver={e => e.target.style.borderColor = 'rgba(255,255,255,0.18)'}
+                        onMouseOut={e => { if (document.activeElement !== e.target) e.target.style.borderColor = 'rgba(255,255,255,0.10)'; }}
+                      />
+                    </div>
+                    <ERR msg={errors.email} />
+                  </div>
+                </div>
+
+                {/* Row 2: Password + Skills(FL) */}
+                <div style={{ ...stagger(7), display: 'grid', gridTemplateColumns: isFL ? '1fr 1fr' : '1fr', gap: '14px', marginBottom: '14px' }}>
+                  <div>
+                    <label style={LABEL_STYLE}>Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+                      <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleChange}
+                        placeholder="Min 6 characters" style={{ ...iBase, paddingRight: '44px' }} onFocus={onFocusIn} onBlur={onFocusOut}
+                        onMouseOver={e => e.target.style.borderColor = 'rgba(255,255,255,0.18)'}
+                        onMouseOut={e => { if (document.activeElement !== e.target) e.target.style.borderColor = 'rgba(255,255,255,0.10)'; }}
+                      />
+                      <button type="button" onClick={() => setShowPassword(p => !p)}
+                        style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.28)', padding: 0, display: 'flex' }}>
+                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                    <ERR msg={errors.password} />
+                  </div>
+
+                  {/* Skills — only for freelancer, slides in */}
+                  <div style={{ overflow: 'hidden', maxHeight: isFL ? '90px' : '0', opacity: isFL ? 1 : 0, transition: 'max-height .4s cubic-bezier(.16,1,.3,1), opacity .3s ease' }}>
+                    <label style={LABEL_STYLE}>Skills (comma-separated)</label>
+                    <input name="skills" type="text" value={formData.skills} onChange={handleChange}
+                      placeholder="React, Node.js, Python..." style={iPlain} onFocus={onFocusIn} onBlur={onFocusOut}
+                      onMouseOver={e => e.target.style.borderColor = 'rgba(255,255,255,0.18)'}
+                      onMouseOut={e => { if (document.activeElement !== e.target) e.target.style.borderColor = 'rgba(255,255,255,0.10)'; }}
+                    />
+                  </div>
+                </div>
+
+                {/* Bio — full width */}
+                <div style={{ ...stagger(8), marginBottom: '22px' }}>
+                  <label style={LABEL_STYLE}>Bio <span style={{ color: 'rgba(255,255,255,0.22)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                  <textarea name="bio" value={formData.bio} onChange={handleChange} rows={3}
+                    placeholder={isFL ? 'Tell clients about your expertise, background, and what makes you stand out...' : 'Tell freelancers about your company, projects, and what you\'re looking to build...'}
+                    style={{ ...iPlain, resize: 'none', paddingTop: '13px', paddingBottom: '13px', lineHeight: '1.55' }}
+                    onFocus={onFocusIn} onBlur={onFocusOut}
+                    onMouseOver={e => e.target.style.borderColor = 'rgba(255,255,255,0.18)'}
+                    onMouseOut={e => { if (document.activeElement !== e.target) e.target.style.borderColor = 'rgba(255,255,255,0.10)'; }}
+                  />
+                </div>
+
+                {/* Submit */}
+                <div style={stagger(9)}>
+                  <button type="submit" disabled={loading || submitSuccess}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                      padding: '15px 0', borderRadius: '13px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+                      border: 'none', position: 'relative', overflow: 'hidden', transition: 'all .3s ease',
+                      background: submitSuccess ? 'linear-gradient(135deg,#059669,#10b981)' : A.btnGrad,
+                      color: A.btnColor, boxShadow: A.btnShd,
+                      transform: loading ? 'scale(0.99)' : 'scale(1)',
+                    }}
+                    onMouseOver={e => { if (!loading && !submitSuccess) e.currentTarget.style.filter = 'brightness(1.10)'; }}
+                    onMouseOut={e => { e.currentTarget.style.filter = 'none'; }}>
+                    {/* Shine overlay */}
+                    {!loading && !submitSuccess && (
+                      <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)', transform: 'translateX(-100%) skewX(-12deg)', transition: 'transform .7s ease', pointerEvents: 'none' }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateX(220%) skewX(-12deg)'; }} />
+                    )}
+                    {submitSuccess
+                      ? <><CheckCircle size={17} /><span>Account Created!</span></>
+                      : loading
+                        ? <div style={{ width: '17px', height: '17px', borderRadius: '50%', border: `2.5px solid transparent`, borderTopColor: A.btnColor, animation: 'spin 0.75s linear infinite', opacity: .7 }} />
+                        : <><span>Create Account</span><ArrowRight size={17} /></>
+                    }
+                  </button>
+                </div>
+              </form>
+
+              {/* Footer links */}
+              <div style={{ ...stagger(10), marginTop: '22px', textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.32)' }}>
+                  Already have an account?{' '}
+                  <Link to="/login" className={`font-semibold transition-colors ${A.linkCls}`}>Sign in here</Link>
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Bottom trust row */}
+          <div style={{ ...stagger(11), display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginTop: '18px' }}>
+            {['🔒 SSL Encrypted', '✓ No credit card', '🌍 50K+ Members'].map(t => (
+              <span key={t} style={{ fontSize: '11px', color: 'rgba(255,255,255,0.18)', fontWeight: 500 }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default SignupPage;
