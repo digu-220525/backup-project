@@ -35,3 +35,21 @@ async def transaction_history(
     current_user: UserOut = Depends(get_current_user)
 ):
     return await service.get_transaction_history(db=db, user_id=current_user.user_id)
+
+@router.post("/create-payment-intent", response_model=schemas.PaymentIntentResponse)
+async def create_payment_intent(
+    req: schemas.PaymentIntentRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'client':
+        raise HTTPException(status_code=403, detail="Only clients can deposit escrow.")
+    return await service.create_payment_intent(db, req.project_id, current_user.user_id)
+
+from fastapi import Request
+
+@router.post("/webhook")
+async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+    return await service.handle_stripe_webhook(db, payload, sig_header)

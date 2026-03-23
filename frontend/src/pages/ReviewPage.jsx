@@ -2,238 +2,274 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { Star, ArrowLeft, CheckCircle, ThumbsUp } from 'lucide-react';
-import PageBackground from '../components/PageBackground';
+import { Star, ArrowLeft, CheckCircle, Send, Briefcase, DollarSign } from 'lucide-react';
 
-const StarPicker = ({ rating, onChange }) => (
- <div className="flex items-center gap-2">
- {[1, 2, 3, 4, 5].map(star => (
- <button
- key={star}
- type="button"
- onClick={() => onChange(star)}
- className={`transition-transform hover:scale-125 active:scale-110 ${star <= rating ? 'text-amber-400' : 'text-slate-200'}`}
- >
- <Star className={`w-8 h-8 ${star <= rating ? 'fill-amber-400' : 'fill-current'}`} />
- </button>
- ))}
- <span className="ml-2 text-sm font-medium text-slate-600">
- {rating === 1 ? 'Poor' : rating === 2 ? 'Fair' : rating === 3 ? 'Good' : rating === 4 ? 'Very Good' : 'Excellent!'}
- </span>
- </div>
-);
+/* ─── Star Picker ─────────────────────────────────────────────────────────── */
+const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
+const StarPicker = ({ rating, onChange }) => {
+  const [hovered, setHovered] = useState(0);
+  const active = hovered || rating;
+
+  return (
+    <div className="flex flex-col items-center gap-5">
+      <div className="flex items-center gap-2">
+        {[1, 2, 3, 4, 5].map(s => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => onChange(s)}
+            onMouseEnter={() => setHovered(s)}
+            onMouseLeave={() => setHovered(0)}
+            className="transition-transform duration-150 hover:scale-115 active:scale-95 focus:outline-none"
+          >
+            <Star
+              size={36}
+              strokeWidth={1.5}
+              className={`transition-all duration-200 ${
+                s <= active
+                  ? 'text-amber-400 fill-amber-400'
+                  : 'text-white/15 fill-white/5'
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+      <div className="h-6 flex items-center">
+        {active > 0 && (
+          <span className={`text-sm font-bold tracking-wide transition-all ${
+            active >= 4 ? 'text-amber-400' : active === 3 ? 'text-white/60' : 'text-white/40'
+          }`}>
+            {labels[active]} {active === 5 ? '✨' : ''}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Quick Phrases ───────────────────────────────────────────────────────── */
+const quickPhrases = [
+  'Great communication',
+  'Delivered on time',
+  'Exceeded expectations',
+  'High quality work',
+  'Would hire again',
+  'Professional attitude',
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 const ReviewPage = () => {
- const { id } = useParams();
- const { user } = useContext(AuthContext);
- const [project, setProject] = useState(null);
- const [rating, setRating] = useState(5);
- const [hoverRating, setHoverRating] = useState(0);
- const [comment, setComment] = useState('');
- const [loading, setLoading] = useState(false);
- const [submitted, setSubmitted] = useState(false);
- const [error, setError] = useState('');
- const navigate = useNavigate();
+  const { id } = useParams();
+  const { user } = useContext(AuthContext);
+  const [project, setProject]   = useState(null);
+  const [rating, setRating]     = useState(0);
+  const [comment, setComment]   = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError]       = useState('');
+  const navigate = useNavigate();
 
- useEffect(() => {
- api.get('/projects').then(res => {
- const found = res.data.find(p => p.project_id === parseInt(id));
- if (found) setProject(found);
- }).catch(console.error);
- }, [id]);
+  useEffect(() => {
+    api.get('/projects').then(res => {
+      const found = res.data.find(p => p.project_id === parseInt(id));
+      if (found) setProject(found);
+    }).catch(console.error);
+  }, [id]);
 
- const handleSubmit = async (e) => {
- e.preventDefault();
- if (!comment.trim()) { setError('Please write a comment before submitting.'); return; }
- setLoading(true);
- setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (rating === 0) { setError('Please select a star rating.'); return; }
+    if (!comment.trim()) { setError('Please write a brief review comment.'); return; }
 
- const revieweeId = user.user_id === project.client_id ? project.freelancer_id : project.client_id;
+    setLoading(true);
+    setError('');
 
- try {
- await api.post('/reviews', {
- project_id: parseInt(id),
- reviewee_id: revieweeId,
- rating: parseInt(rating),
- comment: comment,
- });
- setSubmitted(true);
- setTimeout(() => navigate('/dashboard'), 2500);
- } catch (err) {
- setError(err.response?.data?.detail || 'Error submitting review. Please try again.');
- } finally {
- setLoading(false);
- }
- };
+    const revieweeId = user.user_id === project.client_id
+      ? project.freelancer_id
+      : project.client_id;
 
- if (!project) return (
- <div className="min-h-screen pt-24 relative flex items-center justify-center">
- <PageBackground variant="dark" />
- <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
- </div>
- );
+    try {
+      await api.post('/reviews', {
+        project_id: parseInt(id),
+        reviewee_id: revieweeId,
+        rating: parseInt(rating),
+        comment: comment.trim(),
+      });
+      setSubmitted(true);
+      setTimeout(() => navigate('/dashboard'), 2800);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to submit review. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
- if (submitted) return (
- <div className="min-h-screen pt-24 relative flex items-center justify-center">
- <PageBackground variant="dark" />
- <div className="text-center max-w-sm mx-auto px-4 animate-slide-up relative z-10">
- <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">REVIEW SUBMITTED</h2>
- <p className="text-blue-100/90 text-base font-bold uppercase tracking-widest mb-8 leading-relaxed">Thank you for your feedback. Reputation updated across the platform.</p>
- <div className="flex items-center justify-center gap-3 text-emerald-400 font-bold text-base uppercase tracking-widest">
- <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
- <span>Syncing Dashboard...</span>
- </div>
- </div>
- </div>
- );
+  /* ── loading ── */
+  if (!project) return (
+    <div className="min-h-screen bg-[#070e1c] flex items-center justify-center">
+      <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
- return (
- <div className="min-h-screen pt-20 relative">
- <PageBackground variant="dark" />
- <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
- <div className="mb-10">
- <Link to={`/projects/${id}`} className="inline-flex items-center gap-3 text-base font-bold text-blue-100/90 hover:text-white transition-all uppercase tracking-widest group">
- <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
- Back to Project Dashboard
- </Link>
- </div>
+  /* ── success screen ── */
+  if (submitted) return (
+    <div className="min-h-screen bg-[#070e1c] flex items-center justify-center px-4">
+      <div className="text-center max-w-sm">
+        <div
+          className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6"
+          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
+        >
+          <CheckCircle size={36} className="text-emerald-400" />
+        </div>
+        <h2 className="text-2xl font-black text-white tracking-tight mb-3">Review Submitted</h2>
+        <p className="text-sm text-white/40 font-medium leading-relaxed mb-8">
+          Thank you for your feedback. Your review helps build trust across the platform.
+        </p>
+        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-white/25">
+          <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+          Redirecting to dashboard…
+        </div>
+      </div>
+    </div>
+  );
 
- <div className="bg-[#111827]/40 backdrop-blur-3xl rounded-[3rem] border border-[#2563EB]/10 p-12 animate-fade-in relative z-10 overflow-hidden text-center shadow-3xl">
- <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/5 blur-[150px] rounded-full -mr-48 -mt-48 pointer-events-none"></div>
- 
- <div className="relative z-10 mb-16">
- <div className="w-24 h-24 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-10 border border-amber-500/20">
- <Star className="w-12 h-12 text-amber-500 fill-amber-500/20" />
- </div>
- <h1 className="text-6xl font-black text-white leading-none tracking-tighter uppercase mb-6">ASSESS OPS</h1>
- <div className="flex items-center justify-center gap-4">
- <span className="h-[2px] w-12 bg-amber-500/30"></span>
- <p className="text-blue-100/90 font-bold text-sm uppercase tracking-widest">
- MISSION #{id} PERFORMANCE PROTOCOL
- </p>
- </div>
- </div>
+  const reviewingLabel = user.user_id === project.client_id ? 'Reviewing Freelancer' : 'Reviewing Client';
+  const charCount = comment.length;
+  const isReady = rating > 0 && comment.trim().length > 0;
 
- {error && (
- <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 animate-fade-in">
- {error}
- </div>
- )}
+  return (
+    <div className="min-h-screen bg-[#070e1c] pt-20 pb-16">
+      <div className="max-w-lg mx-auto px-4 py-10">
 
- <form onSubmit={handleSubmit} className="space-y-10 relative z-10 text-left">
- {/* Star Rating */}
- <div className="flex flex-col items-center bg-[#1e293b]/2 rounded-[2.5rem] p-10 border border-[#2563EB]/10 shadow-inner">
- <label className="block text-sm font-bold text-amber-500 uppercase tracking-[0.6em] mb-10 text-center">
- EXPERIENCE MAGNITUDE
- </label>
- <div className="flex flex-col items-center gap-6">
- <div className="flex items-center gap-6">
- {[1, 2, 3, 4, 5].map(star => (
- <button
- key={star}
- type="button"
- onClick={() => setRating(star)}
- onMouseEnter={() => setHoverRating(star)}
- onMouseLeave={() => setHoverRating(0)}
- className="transition-all hover:scale-125 active:scale-110 duration-300"
- >
- <Star
- className={`w-16 h-16 transition-all duration-500 ${
- star <= (hoverRating || rating) ? 'fill-amber-400 text-amber-400' : 'fill-white/5 text-white/5 border-[#2563EB]/10'
- }`}
- />
- </button>
- ))}
- </div>
- <div className="bg-[#1e293b]/5 px-8 py-3 rounded-full border border-[#2563EB]/10 mt-4">
- <p className="text-sm font-bold text-white uppercase tracking-widest leading-none">
- {(hoverRating || rating) === 1 ? 'Poor' : 
- (hoverRating || rating) === 2 ? 'Fair' : 
- (hoverRating || rating) === 3 ? 'Good' : 
- (hoverRating || rating) === 4 ? 'Very Good' : 'Elite Class Experience ⭐'}
- </p>
- </div>
- </div>
- </div>
+        {/* back */}
+        <Link
+          to={`/projects/${id}`}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-white/35 hover:text-white transition-colors mb-8 group"
+        >
+          <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
+          Back to Project
+        </Link>
 
- {/* Comment */}
- <div className="bg-[#1e293b]/2 rounded-[2.5rem] p-10 border border-[#2563EB]/10 shadow-inner">
- <div className="flex justify-between items-center mb-8">
- <label className="block text-sm font-bold text-blue-500 uppercase tracking-[0.6em]">
- MISSION BRIEF
- </label>
- <div className="flex flex-col items-end">
- <span className={`text-base font-bold uppercase tracking-widest ${comment.length > 20 ? 'text-emerald-400' : 'text-white/70'}`}>
- {comment.length} DATA NODES
- </span>
- <div className="h-1 w-24 bg-[#1e293b]/5 rounded-full overflow-hidden mt-1">
- <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${Math.min(100, comment.length)}%` }}></div>
- </div>
- </div>
- </div>
- <textarea
- className={`w-full px-8 py-6 bg-slate-950/60 backdrop-blur-3xl rounded-[2rem] border text-base text-white focus:outline-none focus:border-blue-500 transition-all font-medium placeholder-white/5 resize-none leading-relaxed italic ${
- error && !comment ? 'border-red-400/50 shadow-inner' : 'border-[#2563EB]/10'
- }`}
- rows={6}
- value={comment}
- onChange={e => setComment(e.target.value)}
- placeholder="Log your mission assessment here..."
- />
- </div>
+        {/* ── project pill ── */}
+        <div className="flex items-center gap-3 mb-7">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <Star size={15} />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-amber-400/70 uppercase tracking-widest">{reviewingLabel}</p>
+            <p className="text-sm font-bold text-white">
+              {project.job_title || `Project #${project.project_id}`}
+            </p>
+          </div>
+          {project.job_budget && (
+            <div className="ml-auto flex items-center gap-1 text-xs font-semibold text-white/25">
+              <DollarSign size={11} />
+              {Number(project.job_budget).toLocaleString()}
+            </div>
+          )}
+        </div>
 
- {/* Quick phrases */}
- <div className="px-10">
- <p className="text-base font-bold text-white/70 uppercase tracking-widest mb-6">PRESET LOG ENTRIES:</p>
- <div className="flex flex-wrap gap-4">
- {[
- 'SYNERGY OPTIMIZED',
- 'TIMESTAMP NOMINAL',
- 'OBJECTIVES EXCEEDED',
- 'ELITE COLLABORATION',
- 'QUALITY VERIFIED',
- ].map(phrase => (
- <button
- key={phrase}
- type="button"
- onClick={() => setComment(prev => prev ? prev + ' ' + phrase : phrase)}
- className="text-base font-bold uppercase tracking-widest bg-[#1e293b]/2 border border-[#2563EB]/10 text-blue-400/60 px-6 py-3 rounded-2xl hover:border-blue-400 hover:text-white hover:bg-blue-600 transition-all duration-300"
- >
- {phrase}
- </button>
- ))}
- </div>
- </div>
+        {/* ── main card ── */}
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-[28px] overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          {/* star section */}
+          <div
+            className="px-7 py-8 text-center"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-6">Overall Rating</p>
+            <StarPicker rating={rating} onChange={setRating} />
+          </div>
 
- {/* Submit */}
- <div className="flex gap-4 pt-8 border-t border-[#2563EB]/10 relative z-10">
- <button
- type="button"
- onClick={() => navigate(-1)}
- className="px-10 py-4 border border-[#2563EB]/20 text-white font-bold text-base rounded-[1.5rem] hover:bg-[#1e293b]/5 transition-all active:scale-95 uppercase tracking-widest"
- >
- CANCEL
- </button>
- <button
- type="submit"
- disabled={loading}
- className="flex-1 flex items-center justify-center gap-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black py-4 rounded-[1.5rem] hover: transition-all active:scale-95 disabled:opacity-60 text-xs uppercase tracking-wider"
- >
- {loading ? (
- <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
- ) : (
- <>
- <CheckCircle className="w-5 h-5" />
- SUBMIT REVIEW
- </>
- )}
- </button>
- </div>
- </form>
- </div>
- </div>
- </div>
- );
+          {/* comment section */}
+          <div className="px-7 py-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-white/30 uppercase tracking-widest">Your Review</p>
+              <span className={`text-xs font-bold tabular-nums transition-colors ${
+                charCount > 20 ? 'text-white/40' : 'text-white/15'
+              }`}>
+                {charCount} chars
+              </span>
+            </div>
+            <textarea
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              placeholder="Share your experience working on this project…"
+              rows={4}
+              className="w-full px-4 py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm font-medium placeholder-white/20 focus:outline-none focus:border-indigo-500/40 resize-none transition-colors leading-relaxed"
+            />
+
+            {/* quick phrases */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              {quickPhrases.map(phrase => (
+                <button
+                  key={phrase}
+                  type="button"
+                  onClick={() => setComment(prev => prev ? `${prev}. ${phrase}` : phrase)}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-white/[0.08] text-white/35 hover:text-white/70 hover:border-white/20 hover:bg-white/[0.04] transition-all"
+                >
+                  + {phrase}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* error */}
+          {error && (
+            <div className="mx-7 mb-4 px-4 py-3 rounded-xl text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20">
+              {error}
+            </div>
+          )}
+
+          {/* submit row */}
+          <div
+            className="px-7 pb-7 pt-2 flex gap-3"
+          >
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex-none px-5 py-3 rounded-xl text-sm font-bold text-white/40 hover:text-white/70 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !isReady}
+              className="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-black text-white transition-all active:scale-[0.98] disabled:opacity-40"
+              style={isReady && !loading ? {
+                background: 'linear-gradient(135deg,#f59e0b,#d97706)',
+                boxShadow: '0 4px 20px rgba(245,158,11,0.25)',
+              } : {
+                background: 'rgba(255,255,255,0.06)',
+              }}
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Send size={14} />
+                  Submit Review
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* bottom note */}
+        <p className="text-center text-xs text-white/20 font-medium mt-5 leading-relaxed">
+          Reviews are public and help build trust on the platform. Be honest and constructive.
+        </p>
+
+      </div>
+    </div>
+  );
 };
 
 export default ReviewPage;

@@ -3,64 +3,72 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import {
   CheckCircle, AlertCircle, DollarSign, Lock,
-  ShieldCheck, ArrowLeft, Briefcase, Info, CreditCard
+  ShieldCheck, ArrowLeft, Briefcase, Info
 } from 'lucide-react';
 import PageBackground from '../components/PageBackground';
 
-const PaymentPage = () => {
+const EscrowPaymentPage = () => {
   const { id } = useParams();
-  const [job, setJob]                   = useState(null);
   const [project, setProject]           = useState(null);
+  const [job, setJob]                   = useState(null);
   const [verifying, setVerifying]       = useState(false);
   const [error, setError]               = useState('');
   const [success, setSuccess]           = useState(false);
-  const [authPassword, setAuthPassword] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const init = async () => {
       try {
-        const projRes = await api.get('/projects');
-        const found   = projRes.data.find(p => p.project_id === parseInt(id));
-        if (!found) { navigate('/dashboard'); return; }
-        setProject(found);
-        if (found.status === 'completed') { setSuccess(true); return; }
-        if (found.status !== 'work_submitted') {
-          setError('Work has not been submitted yet. Please wait for the freelancer to submit before releasing payment.');
-          setTimeout(() => navigate(`/projects/${id}`), 3000);
-          return;
+        const projRes = await api.get(`/projects`);
+        const p = projRes.data.find(proj => proj.project_id === parseInt(id));
+        if (!p) { navigate('/dashboard'); return; }
+        setProject(p);
+        
+        if (p.status !== 'pending_escrow') {
+          navigate(`/projects/${id}`);
+          return; // already funded
         }
-        const jobRes = await api.get(`/jobs/${found.job_id}`);
+        
+        const jobRes = await api.get(`/jobs/${p.job_id}`);
         setJob(jobRes.data);
-      } catch {
+      } catch (err) {
         navigate('/dashboard');
       }
     };
     init();
   }, [id, navigate]);
 
-  const handleProcessPayment = async (e) => {
+  const handleFundEscrow = async (e) => {
     e.preventDefault();
-    if (!authPassword.trim()) { setError('Please enter your password to confirm payment.'); return; }
     setVerifying(true);
     setError('');
+    
     try {
-      await api.post('/auth/verify-password', { password: authPassword });
-      await api.put(`/projects/${id}/approve`);
-      // Step 1: hold (create transaction as 'held')
-      await api.post('/payments', { project_id: parseInt(id), amount: job.budget });
-      // Step 2: immediately release it to the freelancer
-      await api.post(`/payments/release/${id}`);
+      // 1. Create intent
+      const intentRes = await api.post('/payments/create-payment-intent', { project_id: project.project_id });
+      
+      // 2. Simulate webhook call (Since we don't have a real stripe setup listening)
+      await api.post('/payments/webhook', {
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            metadata: {
+              project_id: project.project_id.toString(),
+              amount: job.budget.toString()
+            }
+          }
+        }
+      });
+      
       setSuccess(true);
       setTimeout(() => navigate('/dashboard'), 3000);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Incorrect password. Please try again.');
+      setError(err.response?.data?.detail || 'Payment failed. Please try again.');
     } finally {
       setVerifying(false);
     }
   };
 
-  /* ── Loading state ── */
   if (!job && !success) return (
     <div className="min-h-screen flex items-center justify-center bg-[#070e1c]">
       <PageBackground variant="dark" />
@@ -68,7 +76,6 @@ const PaymentPage = () => {
     </div>
   );
 
-  /* ── Success state ── */
   if (success) return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#070e1c]/90 backdrop-blur-2xl">
       <div
@@ -82,13 +89,13 @@ const PaymentPage = () => {
         <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
           <CheckCircle size={36} className="text-emerald-400" />
         </div>
-        <h2 className="text-2xl font-black text-white tracking-tight mb-3">Payment Released!</h2>
+        <h2 className="text-2xl font-black text-white tracking-tight mb-3">Escrow Funded!</h2>
         <p className="text-sm text-white/45 font-medium leading-relaxed mb-8">
-          The payment of <span className="text-emerald-400 font-bold">${Number(job?.budget || 0).toLocaleString()}</span> has been released to the freelancer and the project is now marked as completed.
+          You have successfully deposited <span className="text-emerald-400 font-bold">${Number(job?.budget || 0).toLocaleString()}</span> into Escrow. The freelancer has been notified to start work.
         </p>
         <div className="flex items-center justify-center gap-2 text-sm font-semibold text-emerald-400/60">
           <div className="w-4 h-4 border-2 border-emerald-500/40 border-t-emerald-400 rounded-full animate-spin" />
-          Redirecting to dashboard...
+          Redirecting to your dashboard...
         </div>
       </div>
     </div>
@@ -101,37 +108,31 @@ const PaymentPage = () => {
       <PageBackground variant="dark" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
-
-        {/* Back link */}
+        
         <Link
-          to={`/projects/${id}`}
+          to={`/dashboard`}
           className="inline-flex items-center gap-2 text-sm font-semibold text-white/40 hover:text-white transition-colors mb-8 group"
         >
           <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
-          Back to Project
+          Back to Dashboard
         </Link>
 
-        {/* Page title */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <DollarSign size={18} />
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <Lock size={18} />
             </div>
             <div>
-              <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
-                Project #{id}
+              <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+                Job #{job.job_id}
               </p>
-              <h1 className="text-2xl font-black text-white tracking-tight">Release Payment</h1>
+              <h1 className="text-2xl font-black text-white tracking-tight">Fund Escrow</h1>
             </div>
           </div>
-          {project?.job_title && (
-            <p className="text-sm text-white/30 ml-[52px] font-medium">{project.job_title}</p>
-          )}
+          <p className="text-sm text-white/30 ml-[52px] font-medium">{job.title}</p>
         </div>
 
         <div className="grid lg:grid-cols-5 gap-6 items-start">
-
-          {/* ── Main Form ── */}
           <div className="lg:col-span-3">
             <div
               className="rounded-[28px] overflow-hidden"
@@ -141,22 +142,18 @@ const PaymentPage = () => {
                 backdropFilter: 'blur(24px)',
               }}
             >
-              <form onSubmit={handleProcessPayment}>
-
-                {/* Header strip */}
+              <form onSubmit={handleFundEscrow}>
                 <div className="px-6 pt-6 pb-5 border-b border-white/[0.06]">
                   <div className="flex items-center gap-2.5">
-                    <Lock size={15} className="text-indigo-400" />
-                    <p className="text-sm font-bold text-white">Confirm & Authorize</p>
+                    <ShieldCheck size={15} className="text-indigo-400" />
+                    <p className="text-sm font-bold text-white">Deposit via Stripe Secure</p>
                   </div>
                   <p className="text-xs text-white/30 font-medium mt-1">
-                    Enter your account password to release the escrow payment to the freelancer.
+                    Your money is held securely in Escrow until you approve the final work.
                   </p>
                 </div>
 
                 <div className="p-6 space-y-5">
-
-                  {/* Error */}
                   {error && (
                     <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-red-500/8 border border-red-500/15 text-sm text-red-300 font-medium">
                       <AlertCircle size={15} className="flex-shrink-0 mt-0.5" />
@@ -164,70 +161,24 @@ const PaymentPage = () => {
                     </div>
                   )}
 
-                  {/* Password field */}
-                  <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-white/60 uppercase tracking-widest mb-2">
-                      <ShieldCheck size={12} className="text-indigo-400" />
-                      Account Password
-                      <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      placeholder="Enter your password to confirm"
-                      value={authPassword}
-                      onChange={e => { setAuthPassword(e.target.value); setError(''); }}
-                      className="w-full px-4 py-3.5 rounded-xl text-sm text-white font-medium focus:outline-none transition-all placeholder-white/[0.12]"
-                      style={{
-                        background: 'rgba(0,0,0,0.3)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        fontFamily: 'inherit',
-                      }}
-                      onFocus={e => { e.target.style.border = '1px solid rgba(99,102,241,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; }}
-                      onBlur={e => { e.target.style.border = '1px solid rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
-                      required
-                    />
-                    <p className="text-xs text-white/20 font-medium mt-2 flex items-center gap-1.5">
-                      <ShieldCheck size={11} className="text-indigo-400/50" />
-                      Your password is verified securely and never stored in transit.
-                    </p>
-                  </div>
-
-                  {/* Confirmation notice */}
-                  <div className="p-4 rounded-2xl border border-amber-500/10 bg-amber-500/[0.04]">
+                  <div className="p-4 rounded-2xl border border-indigo-500/10 bg-indigo-500/[0.04]">
                     <div className="flex items-start gap-2.5">
-                      <Info size={13} className="text-amber-400/60 flex-shrink-0 mt-0.5" />
+                      <Info size={13} className="text-indigo-400/60 flex-shrink-0 mt-0.5" />
                       <p className="text-xs text-white/35 font-medium leading-relaxed">
-                        By confirming, you approve the freelancer's submitted work and release
-                        <span className="text-amber-400/70 font-bold"> ${budget.toFixed(2)}</span> from escrow.
-                        This action <span className="text-white/50 font-bold">cannot be undone</span>.
+                        By funding, you agree to place <span className="text-indigo-400/70 font-bold">${budget.toFixed(2)}</span> into the secure Escrow system. The freelancer will be notified to begin the job immediately.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 px-6 pb-6">
-                  <button
-                    type="button"
-                    onClick={() => navigate(-1)}
-                    className="px-5 py-3 rounded-xl text-sm font-bold transition-all"
-                    style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: 'rgba(255,255,255,0.35)',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#fff'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; }}
-                  >
-                    Cancel
-                  </button>
                   <button
                     type="submit"
                     disabled={verifying}
                     className="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-black text-white transition-all active:scale-[0.98] disabled:opacity-50"
                     style={{
-                      background: verifying ? 'rgba(16,185,129,0.3)' : 'linear-gradient(135deg,#059669,#047857)',
-                      boxShadow: verifying ? 'none' : '0 4px 20px rgba(5,150,105,0.25)',
+                      background: verifying ? 'rgba(99,102,241,0.3)' : 'linear-gradient(135deg,#6366f1,#4f46e5)',
+                      boxShadow: verifying ? 'none' : '0 4px 20px rgba(99,102,241,0.25)',
                     }}
                   >
                     {verifying ? (
@@ -237,21 +188,17 @@ const PaymentPage = () => {
                       </>
                     ) : (
                       <>
-                        <CheckCircle size={15} />
-                        Release ${budget.toFixed(2)} to Freelancer
+                        <DollarSign size={15} />
+                        Deposit ${budget.toFixed(2)}
                       </>
                     )}
                   </button>
                 </div>
-
               </form>
             </div>
           </div>
 
-          {/* ── Billing Summary ── */}
           <div className="lg:col-span-2 space-y-4">
-
-            {/* Summary card */}
             <div
               className="rounded-[24px] p-6"
               style={{
@@ -267,9 +214,8 @@ const PaymentPage = () => {
 
               <div className="space-y-3 mb-5">
                 {[
-                  { label: 'Job', value: job?.title || `Job #${project?.job_id}` },
-                  { label: 'Contract budget', value: `$${budget.toFixed(2)}` },
-                  { label: 'Platform fee', value: 'Free', highlight: 'text-emerald-400' },
+                  { label: 'Escrow Amount', value: `$${budget.toFixed(2)}` },
+                  { label: 'Platform fee', value: 'Free', highlight: 'text-indigo-400' },
                 ].map(row => (
                   <div key={row.label} className="flex items-center justify-between gap-4">
                     <span className="text-xs font-semibold text-white/35">{row.label}</span>
@@ -285,8 +231,7 @@ const PaymentPage = () => {
                 <span className="text-2xl font-black text-white">${budget.toFixed(2)}</span>
               </div>
             </div>
-
-            {/* Security note */}
+            
             <div
               className="rounded-[20px] p-4"
               style={{
@@ -297,11 +242,10 @@ const PaymentPage = () => {
               <div className="flex items-start gap-2.5">
                 <ShieldCheck size={13} className="text-indigo-400/60 flex-shrink-0 mt-0.5" />
                 <p className="text-[11px] text-white/25 font-medium leading-relaxed">
-                  Nexlance uses secure escrow to protect both clients and freelancers. Funds are held until work is approved and released only upon your confirmation.
+                  Your funds are protected by our Escrow payment system. Payment is only released to the freelancer once you are fully satisfied with the delivered work. 100% money back guarantee if task is not delivered.
                 </p>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -310,4 +254,4 @@ const PaymentPage = () => {
   );
 };
 
-export default PaymentPage;
+export default EscrowPaymentPage;

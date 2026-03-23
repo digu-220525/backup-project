@@ -20,6 +20,7 @@ from payments.routes import router as payments_router
 from reviews.routes import router as reviews_router
 from notifications.routes import router as notifications_router
 from support.routes import router as support_router
+from messages.routes import router as messages_router
 
 
 # ── Lifespan: runs once at startup/shutdown ───────────────────────────────────
@@ -58,6 +59,7 @@ app.include_router(payments_router, prefix="/payments", tags=["Payments"])
 app.include_router(reviews_router,  prefix="/reviews",  tags=["Reviews"])
 app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
 app.include_router(support_router, prefix="/support", tags=["Support"])
+app.include_router(messages_router, prefix="/messages", tags=["Messages"])
 
 
 # ── Health check ─────────────────────────────────────────────────────────────

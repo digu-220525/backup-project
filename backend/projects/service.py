@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
 from projects.models import Project
+from projects import schemas
 from projects.schemas import ProjectCreate, WorkSubmission
 from bids.service import get_bids_for_job
 from jobs.service import get_job
@@ -38,19 +39,11 @@ async def create_project(db: AsyncSession, project: ProjectCreate, client_id: in
         job_id=job.job_id,
         client_id=client_id,
         freelancer_id=accepted_bid.freelancer_id,
-        status='active'
+        status='pending_escrow'
     )
     db.add(db_project)
     await db.commit()
     await db.refresh(db_project)
-
-    # Notify the freelancer
-    await create_notification(db, NotificationCreate(
-        user_id=db_project.freelancer_id,
-        title="Mission Interface Initialized",
-        message=f"Transmission established for Mission #{db_project.project_id}. Review briefing and commence operations.",
-        link=f"/projects/{db_project.project_id}"
-    ))
 
     return db_project
 
@@ -83,6 +76,7 @@ async def submit_work(db: AsyncSession, project_id: int, submission: WorkSubmiss
         
     project.status = 'work_submitted'
     project.work_notes = submission.work_notes
+    project.submitted_at = datetime.utcnow()
     await db.commit()
     await db.refresh(project)
 
@@ -124,4 +118,68 @@ async def approve_work(db: AsyncSession, project_id: int, client_id: int):
         link=f"/projects/{project.project_id}"
     ))
 
+    return project
+
+async def request_changes(db: AsyncSession, project_id: int, client_id: int):
+    project = await get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.client_id != client_id:
+        raise HTTPException(status_code=403, detail="Only the client can request changes")
+    if project.status != 'work_submitted':
+        raise HTTPException(status_code=400, detail="No work submitted to review")
+
+    project.status = 'active'
+    project.work_notes = None
+
+    await db.commit()
+    await db.refresh(project)
+
+    # Notify the freelancer
+    await create_notification(db, NotificationCreate(
+        user_id=project.freelancer_id,
+        title="Changes Requested",
+        message=f"The client has reviewed Mission #{project.project_id} and is requesting revisions.",
+        link=f"/projects/{project.project_id}"
+    ))
+
+    return project
+
+from support.models import Dispute
+
+async def raise_dispute(db: AsyncSession, project_id: int, user_id: int, dispute: schemas.DisputeCreate):
+    project = await get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.client_id != user_id and project.freelancer_id != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+        
+    project.status = 'in_dispute'
+    
+    job = await get_job(db, project.job_id)
+    if job:
+        job.status = 'in_dispute'
+        
+    db_dispute = Dispute(
+        job_id=job.job_id if job else project.job_id,
+        project_id=project.project_id,
+        raised_by_id=user_id,
+        reason=dispute.reason,
+        description=dispute.description,
+        status="open"
+    )
+    db.add(db_dispute)
+    
+    await db.commit()
+    await db.refresh(db_dispute)
+    
+    # Notify other party
+    other_party = project.freelancer_id if user_id == project.client_id else project.client_id
+    await create_notification(db, NotificationCreate(
+        user_id=other_party,
+        title="Dispute Raised",
+        message=f"A dispute was raised for Mission #{project.project_id}. Operations halted.",
+        link=f"/projects/{project.project_id}"
+    ))
+    
     return project

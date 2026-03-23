@@ -25,6 +25,8 @@ class JobOut(JobBase):
     status: str
     is_hidden_by_client: bool
     created_at: datetime
+    bid_count: int = 0
+    unread_bid_count: int = 0
 
     class Config:
         from_attributes = True

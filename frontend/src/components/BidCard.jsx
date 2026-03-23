@@ -35,7 +35,7 @@ const BidCard = ({ bid, onAccept, isJobOpen, jobOwnerId }) => {
           </div>
           <div>
             <h4 className="font-black text-white text-base tracking-tight uppercase leading-none mb-1.5"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              style={{  }}>
               Freelancer #{bid.freelancer_id}
             </h4>
             <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ const BidCard = ({ bid, onAccept, isJobOpen, jobOwnerId }) => {
         {/* Amount */}
         <div className="sm:text-right flex-shrink-0">
           <div className="text-3xl font-black text-white tracking-tight leading-none"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            style={{  }}>
             ${Number(bid.bid_amount).toLocaleString()}
           </div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] mt-1">Proposal Amount</div>

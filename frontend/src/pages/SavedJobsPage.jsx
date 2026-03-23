@@ -122,13 +122,6 @@ const JobCard = ({ job, isSaved, onToggleSave, user }) => {
               <span>{daysAgo === 0 ? 'Today' : `${daysAgo}d ago`}</span>
             </div>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-slate-500">Proposals</span>
-            <div className="flex items-center gap-1.5 text-slate-300">
-              <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-              <span>{job.bid_count || 0}</span>
-            </div>
-          </div>
         </div>
         <Link
           to={`/jobs/${job.job_id}`}
@@ -142,7 +135,7 @@ const JobCard = ({ job, isSaved, onToggleSave, user }) => {
   );
 };
 
-const JobListPage = () => {
+const SavedJobsPage = () => {
   const { user } = React.useContext(AuthContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [jobs, setJobs] = useState([]);
@@ -162,16 +155,13 @@ const JobListPage = () => {
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
-      const [jobsRes, savedRes] = await Promise.all([
-        api.get('/jobs?status=open'),
-        user?.role === 'freelancer' ? api.get('/jobs/saved').catch(()=>({data:[]})) : Promise.resolve({data:[]})
-      ]);
+      const savedRes = await api.get('/jobs/saved').catch(()=>({data:[]}));
       
       if (user?.role === 'freelancer') {
         setSavedJobs(new Set(savedRes.data.map(j => j.job_id)));
       }
       
-      let data = jobsRes.data;
+      let data = savedRes.data;
 
       if (filters.q) {
         const q = filters.q.toLowerCase();
@@ -248,10 +238,10 @@ input[type=number] { -moz-appearance: textfield; }
         {/* Header */}
         <div className="mb-10 text-center sm:text-left">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-3 tracking-tight">
-            Find Work
+            Saved Jobs
           </h1>
           <p className="text-slate-400 text-lg">
-            Discover {jobs.length} exciting opportunities matching your skills.
+            Review your {jobs.length} bookmarked opportunities.
           </p>
         </div>
 
@@ -434,4 +424,4 @@ input[type=number] { -moz-appearance: textfield; }
   );
 };
 
-export default JobListPage;
+export default SavedJobsPage;

@@ -84,7 +84,7 @@ async def accept_bid(db: AsyncSession, bid_id: int, client_id: int):
     for b in bids:
         b.status = 'accepted' if b.bid_id == bid_id else 'rejected'
         
-    job.status = 'in_progress'
+    job.status = 'pending_escrow'
     
     await db.commit()
     await db.refresh(bid)

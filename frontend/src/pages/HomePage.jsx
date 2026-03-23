@@ -20,12 +20,12 @@ const CATEGORIES = [
 const TESTIMONIALS = [
   {
     name: 'Sarah Chen', role: 'Frontend Developer', avatar: 'S', rating: 5,
-    text: 'VantagePoint changed my career. I found amazing clients and grew my income by 3x within 6 months.',
+    text: 'Nexlance changed my career. I found amazing clients and grew my income by 3x within 6 months.',
     color: 'from-violet-500 to-purple-600',
   },
   {
     name: 'Marcus Johnson', role: 'Product Manager at TechCorp', avatar: 'M', rating: 5,
-    text: 'We hire exclusively through VantagePoint. The quality of talent here is truly exceptional.',
+    text: 'We hire exclusively through Nexlance. The quality of talent here is truly exceptional.',
     color: 'from-blue-500 to-cyan-600',
   },
   {
@@ -139,7 +139,8 @@ const HomePage = () => {
       <section className="relative min-h-screen flex items-center overflow-hidden">
 
         {/* ─── HERO BACKGROUND — warm collab photo, same as freelancer section ─── */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0"
+             style={{ maskImage: 'linear-gradient(to bottom, black 0%, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 80%, transparent 100%)' }}>
 
           {/* Same warm collaborative photo used in the freelancer section */}
           <img
@@ -312,7 +313,7 @@ const HomePage = () => {
       {/* ═══════════════════════════════════════════════════════
           CATEGORIES
           ═══════════════════════════════════════════════════════ */}
-      <section className="py-24 relative overflow-hidden bg-slate-950">
+      <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.06),transparent_55%)] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-14">
@@ -349,9 +350,10 @@ const HomePage = () => {
           FREELANCER FEATURES — Mindrift-style (Image 4)
           Full-bleed with photo, why freelancers choose us
           ═══════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-slate-900">
+      <section className="relative overflow-hidden">
         {/* Background photo — premium focused freelancer at workstation, distinct from hero */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0"
+             style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)' }}>
           {/*
             Cinematic shot: freelancer focused at a beautiful dual-monitor setup,
             warm ambient desk lighting, bokeh background — totally different vibe from hero.
@@ -446,7 +448,7 @@ const HomePage = () => {
       {/* ═══════════════════════════════════════════════════════
           HOW IT WORKS
           ═══════════════════════════════════════════════════════ */}
-      <section className="py-28 relative overflow-hidden bg-slate-950">
+      <section className="py-28 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-5 py-2 bg-white/[0.06] border border-white/[0.1] rounded-full text-white/60 text-sm font-bold uppercase tracking-widest mb-5">Simple Process</div>
@@ -552,7 +554,8 @@ const HomePage = () => {
       <section className="relative overflow-hidden" style={{ minHeight: '820px', paddingTop: '90px', paddingBottom: '90px' }}>
 
         {/* ── BACKGROUND: vivid abstract tech/network HD photo ── */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0"
+             style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)' }}>
           <img
             src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=95&auto=format&fit=crop"
             alt=""
@@ -763,7 +766,8 @@ const HomePage = () => {
       <section className="relative overflow-hidden py-28">
 
         {/* ── BACKGROUND: premium abstract tech / circuit board HD ── */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0"
+             style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)' }}>
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=2560&q=95&auto=format&fit=crop&crop=center"
             alt=""
@@ -814,7 +818,7 @@ const HomePage = () => {
                 backdropFilter: 'blur(12px)',
               }}>
               <CheckCircle className="w-4 h-4 text-emerald-400" />
-              Why VantagePoint
+              Why Nexlance
             </div>
 
             <h2 className="font-black text-white mb-4 uppercase leading-tight"
@@ -1035,18 +1039,13 @@ const HomePage = () => {
               <span className="relative z-10">Browse Jobs</span>
             </Link>
           </div>
-
-          {/* Micro trust line */}
-          <p className="mt-10 text-white/30 text-sm font-medium">
-            No subscription fee · Cancel anytime · 50,000+ freelancers already joined
-          </p>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
           SUPPORT & COMPLAINTS
           ═══════════════════════════════════════════════════════ */}
-      <section className="py-20 relative overflow-hidden bg-slate-950">
+      <section className="py-20 relative overflow-hidden">
         <div className="max-w-3xl mx-auto px-4 relative z-10">
           <div className="bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/[0.1] p-10 lg:p-14 relative overflow-hidden"
             style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.05), 0 32px 80px rgba(0,0,0,0.5)' }}>
@@ -1113,15 +1112,26 @@ const HomePage = () => {
           FOOTER
           ═══════════════════════════════════════════════════════ */}
       <footer className="relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-slate-950 border-t border-white/[0.07]"></div>
+        <div className="absolute inset-0 border-t border-white/[0.07]" style={{ background: 'transparent' }}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-4 gap-10 mb-14">
             <div>
               <div className="flex items-center gap-2.5 mb-5">
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  <Briefcase className="w-4 h-4 text-white" />
+                {/* Nexlance SVG icon */}
+                <div className="relative flex items-center justify-center w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full relative z-10">
+                    <path d="M9 22.5L9 9C9 7.34315 10.3431 6 12 6C13.6569 6 15 7.34315 15 9V17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17L21 9C21 8.44772 21.4477 8 22 8V8C22.5523 8 23 8.44772 23 9L23 17C23 19.7614 20.7614 22 18 22C15.2386 22 13 19.7614 13 17V9.5C13 8.67157 12.3284 8 11.5 8C10.6716 8 10 8.67157 10 9.5V23C10 23.5523 9.55228 24 9 24V24C8.44772 24 8 23.5523 8 23L8 22.5C8 21.6716 8.67157 21 9.5 21C10.3284 21 11 21.6716 11 22.5V22.5" fill="url(#footerNexGrad)" />
+                    <defs>
+                      <linearGradient id="footerNexGrad" x1="8" y1="6" x2="23" y2="24" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#22d3ee" />
+                        <stop offset="0.5" stopColor="#3b82f6" />
+                        <stop offset="1" stopColor="#9333ea" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 opacity-30 blur-md" />
                 </div>
-                <span className="text-white font-black text-lg tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>VantagePoint</span>
+                <span className="text-white font-black text-lg tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Nexlance</span>
               </div>
               <p className="text-white/40 text-sm leading-relaxed max-w-xs font-medium">
                 Empowering the next generation of global talent with a premium, focused work environment.
@@ -1153,7 +1163,7 @@ const HomePage = () => {
             </div>
           </div>
           <div className="border-t border-white/[0.07] pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-white/35 text-sm font-medium">© 2026 VantagePoint. All rights reserved.</p>
+            <p className="text-white/35 text-sm font-medium">© 2026 Nexlance. All rights reserved.</p>
             <p className="text-white/25 text-sm font-semibold uppercase tracking-widest">Built for the world's best talent</p>
           </div>
         </div>

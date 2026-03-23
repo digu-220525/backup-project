@@ -17,3 +17,9 @@ class TransactionOut(TransactionBase):
 
     class Config:
         from_attributes = True
+
+class PaymentIntentRequest(BaseModel):
+    project_id: int
+
+class PaymentIntentResponse(BaseModel):
+    client_secret: str

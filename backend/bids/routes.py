@@ -45,3 +45,12 @@ async def accept_bid(
     if current_user.role != 'client':
         raise HTTPException(status_code=403, detail="Only clients can accept bids.")
     return await service.accept_bid(db=db, bid_id=bid_id, client_id=current_user.user_id)
+
+@router.post("/job/{job_id}/read-all", status_code=204)
+async def mark_bids_read(
+    job_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    await service.mark_bids_as_read(db=db, job_id=job_id)
+    return None

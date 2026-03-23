@@ -15,7 +15,7 @@ const ReviewCard = ({ review }) => {
           </div>
           <div>
             <p className="text-[11px] font-black text-white uppercase tracking-[0.2em]"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              style={{  }}>
               Client #{review.reviewer_id}
             </p>
             <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mt-0.5">

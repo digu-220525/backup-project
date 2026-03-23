@@ -1,153 +1,222 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
-import { ArrowLeft, Upload, Link2, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
+import {
+  ArrowLeft, Upload, CheckCircle, AlertCircle,
+  Briefcase, FileText, Info
+} from 'lucide-react';
 import PageBackground from '../components/PageBackground';
 
 const SubmitWorkPage = () => {
- const { id } = useParams();
- const [project, setProject] = useState(null);
- const [workNotes, setWorkNotes] = useState('');
- const [loading, setLoading] = useState(false);
- const [error, setError] = useState('');
- const navigate = useNavigate();
+  const { id } = useParams();
+  const [project, setProject]     = useState(null);
+  const [workNotes, setWorkNotes] = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
+  const navigate = useNavigate();
 
- useEffect(() => {
- api.get('/projects').then(res => {
- const found = res.data.find(p => p.project_id === parseInt(id));
- if (found) setProject(found);
- }).catch(console.error);
- }, [id]);
+  useEffect(() => {
+    api.get('/projects')
+      .then(res => {
+        const found = res.data.find(p => p.project_id === parseInt(id));
+        if (found) setProject(found);
+      })
+      .catch(console.error);
+  }, [id]);
 
- const handleSubmit = async (e) => {
- e.preventDefault();
- if (!workNotes.trim()) { setError('Please provide work notes before submitting.'); return; }
- setLoading(true);
- setError('');
- try {
- await api.post(`/projects/${id}/submit-work`, { work_notes: workNotes });
- navigate(`/projects/${id}`);
- } catch (err) {
- setError(err.response?.data?.detail || 'Error submitting work. Please try again.');
- } finally {
- setLoading(false);
- }
- };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!workNotes.trim()) { setError('Please describe your completed work before submitting.'); return; }
+    setLoading(true);
+    setError('');
+    try {
+      await api.post(`/projects/${id}/submit-work`, { work_notes: workNotes });
+      navigate(`/projects/${id}`);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Unable to submit work. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
- if (!project) return (
- <div className="min-h-screen pt-24 flex items-center justify-center">
- <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
- </div>
- );
+  if (!project) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#070e1c]">
+      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
- return (
- <div className="min-h-screen pt-20 relative">
- <PageBackground variant="dark" />
- <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
- <div className="mb-10">
- <Link to={`/projects/${id}`} className="inline-flex items-center gap-3 text-base font-bold text-blue-100/90 hover:text-white transition-all uppercase tracking-widest group">
- <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
- Back to Project Details
- </Link>
- </div>
+  const charCount = workNotes.length;
 
- <div className="bg-[#111827]/40 backdrop-blur-3xl rounded-[3rem] border border-[#2563EB]/10 p-12 lg:p-16 animate-fade-in relative z-10 overflow-hidden text-center shadow-3xl">
- <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[150px] rounded-full -mr-48 -mt-48 pointer-events-none"></div>
- 
- <div className="relative z-10 mb-16">
- <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[2rem] flex items-center justify-center mx-auto mb-10 border border-[#2563EB]/20">
- <Upload className="w-12 h-12 text-white" />
- </div>
- <h1 className="text-6xl font-black text-white leading-none tracking-tighter uppercase mb-6">UPLOAD PAYLOAD</h1>
- <div className="flex items-center justify-center gap-4">
- <span className="h-[2px] w-12 bg-blue-500/30"></span>
- <p className="text-blue-100/90 font-bold text-base uppercase tracking-widest">
- PROJECT #{project.project_id} • SECURE UPLINK
- </p>
- </div>
- </div>
+  return (
+    <div className="min-h-screen pt-20 pb-16 relative bg-[#070e1c]">
+      <PageBackground variant="dark" />
 
- {error && (
- <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2.5 animate-fade-in">
- <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
- {error}
- </div>
- )}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
 
- <form onSubmit={handleSubmit} className="space-y-8 relative z-10 text-left">
- {/* Work Notes */}
- <div className="bg-[#1e293b]/2 rounded-[2.5rem] p-10 border border-[#2563EB]/10 shadow-inner">
- <div className="flex justify-between items-center mb-8">
- <label className="block text-sm font-bold text-blue-500 uppercase tracking-[0.6em]">
- OPERATIONAL LOGS <span className="text-red-400">*</span>
- </label>
- <div className="flex flex-col items-end">
- <span className={`text-base font-bold uppercase tracking-widest ${workNotes.length > 20 ? 'text-emerald-400' : 'text-white/70'}`}>
- {workNotes.length} DATA NODES
- </span>
- <div className="h-1 w-24 bg-[#1e293b]/5 rounded-full overflow-hidden mt-1">
- <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${Math.min(100, workNotes.length)}%` }}></div>
- </div>
- </div>
- </div>
- <textarea
- rows={10}
- value={workNotes}
- onChange={e => setWorkNotes(e.target.value)}
- placeholder="Log your operational output and provide objective links..."
- className="w-full px-8 py-6 bg-slate-950/60 backdrop-blur-3xl rounded-[2rem] border border-[#2563EB]/10 text-base text-white focus:outline-none focus:border-blue-500 transition-all font-medium placeholder-white/5 resize-none leading-relaxed italic"
- />
- </div>
+        {/* Back link */}
+        <Link
+          to={`/projects/${id}`}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-white/40 hover:text-white transition-colors mb-8 group"
+        >
+          <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
+          Back to Project
+        </Link>
 
- {/* Checklist */}
- <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[1.5rem] p-6 backdrop-blur-xl">
- <h4 className="text-base font-bold text-emerald-400 uppercase tracking-widest mb-4 flex items-center gap-3">
- <CheckCircle className="w-5 h-5" />
- WORK COMPLETION CHECKLIST:
- </h4>
- <ul className="space-y-3">
- {[
- 'PROJECT REQUIREMENTS MET',
- 'ALL ASSETS PROPERLY LINKED',
- 'ACCESS PERMISSIONS VERIFIED',
- 'DOCUMENTATION INCLUDED',
- ].map((item, i) => (
- <li key={i} className="flex items-start gap-3 text-base font-bold uppercase tracking-widest text-emerald-400/60">
- <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
- {item}
- </li>
- ))}
- </ul>
- </div>
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <Upload size={18} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+                Project #{project.project_id}
+              </p>
+              <h1 className="text-2xl font-black text-white tracking-tight leading-tight">
+                Submit Your Work
+              </h1>
+            </div>
+          </div>
+          {project.job_title && (
+            <p className="text-sm text-white/35 ml-[52px] font-medium">
+              {project.job_title}
+            </p>
+          )}
+        </div>
 
- <div className="flex gap-4 pt-6 border-t border-[#2563EB]/10">
- <button
- type="button"
- onClick={() => navigate(-1)}
- className="px-10 py-4 border border-[#2563EB]/20 text-white font-bold text-base rounded-[1.5rem] hover:bg-[#1e293b]/5 transition-all active:scale-95 uppercase tracking-widest"
- >
- CANCEL
- </button>
- <button
- type="submit"
- disabled={loading}
- className="flex-1 flex items-center justify-center gap-4 bg-gradient-to-r from-[#2563EB] to-[#9B2C8C] text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:shadow-[0_0_25px_rgba(155,44,140,0.6)] border border-blue-500/20 font-black py-4 rounded-[1.5rem] hover: transition-all active:scale-95 disabled:opacity-60 text-xs uppercase tracking-wider"
- >
- {loading ? (
- <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
- ) : (
- <>
- <Upload className="w-5 h-5" />
- SUBMIT WORK
- </>
- )}
- </button>
- </div>
- </form>
- </div>
- </div>
- </div>
- );
+        {/* Main card */}
+        <div
+          className="rounded-[28px] overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+          }}
+        >
+          <form onSubmit={handleSubmit}>
+
+            {/* Work Notes */}
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between mb-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-white">
+                  <FileText size={14} className="text-indigo-400" />
+                  Work Description
+                  <span className="text-red-400 ml-0.5">*</span>
+                </label>
+                <span className={`text-xs font-semibold ${charCount > 30 ? 'text-emerald-400' : 'text-white/25'}`}>
+                  {charCount} characters
+                </span>
+              </div>
+
+              {/* Error */}
+              {error && (
+                <div className="flex items-start gap-2.5 p-3.5 mb-4 rounded-2xl bg-red-500/8 border border-red-500/15 text-sm text-red-300 font-medium">
+                  <AlertCircle size={15} className="flex-shrink-0 mt-0.5" />
+                  {error}
+                </div>
+              )}
+
+              <textarea
+                rows={10}
+                value={workNotes}
+                onChange={e => { setWorkNotes(e.target.value); setError(''); }}
+                placeholder="Describe what you've completed, include any relevant links, files, or notes for the client to review..."
+                className="w-full px-5 py-4 rounded-2xl text-sm text-white font-medium leading-relaxed resize-none focus:outline-none transition-all placeholder-white/[0.12]"
+                style={{
+                  background: 'rgba(0,0,0,0.25)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  fontFamily: 'inherit',
+                }}
+                onFocus={e => { e.target.style.border = '1px solid rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; }}
+                onBlur={e => { e.target.style.border = '1px solid rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
+              />
+
+              {/* Progress bar */}
+              <div className="mt-2 h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(100, (charCount / 200) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Checklist */}
+            <div className="mx-6 md:mx-8 mb-6 p-5 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/[0.1]">
+              <h4 className="flex items-center gap-2 text-xs font-black text-emerald-400/80 uppercase tracking-widest mb-3">
+                <CheckCircle size={13} />
+                Before you submit, confirm:
+              </h4>
+              <ul className="space-y-2">
+                {[
+                  'All project requirements have been fulfilled',
+                  'Links and files are accessible to the client',
+                  'Work is complete and ready for review',
+                  'Documentation or usage notes are included',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-xs font-semibold text-emerald-400/50">
+                    <CheckCircle size={12} className="flex-shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Info note */}
+            <div className="mx-6 md:mx-8 mb-6 p-4 rounded-2xl bg-blue-500/[0.04] border border-blue-500/[0.1] flex items-start gap-2.5">
+              <Info size={13} className="text-blue-400/60 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-white/30 font-medium leading-relaxed">
+                Once submitted, the client will be notified to review your work. The project status will be updated to <span className="text-blue-400/60 font-bold">Awaiting Review</span>.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 p-6 md:p-8 pt-0">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="px-6 py-3 rounded-xl text-sm font-bold text-white/40 hover:text-white transition-colors"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-black text-white transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: loading
+                    ? 'rgba(99,102,241,0.4)'
+                    : 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                  boxShadow: loading ? 'none' : '0 4px 20px rgba(79,70,229,0.25)',
+                }}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={15} />
+                    Submit Work for Review
+                  </>
+                )}
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    </div>
+  );
 };
 
 export default SubmitWorkPage;

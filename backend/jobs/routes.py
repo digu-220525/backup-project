@@ -26,6 +26,30 @@ async def list_jobs(
 ):
     return await service.get_jobs(db=db, status=status)
 
+@router.get("/saved", response_model=List[schemas.JobOut])
+async def get_saved_jobs_route(
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'freelancer':
+        raise HTTPException(status_code=403, detail="Only freelancers can see saved jobs.")
+    return await service.get_saved_jobs(db=db, user_id=current_user.user_id)
+
+@router.post("/{job_id}/save")
+async def toggle_save_job(
+    job_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'freelancer':
+        raise HTTPException(status_code=403, detail="Only freelancers can save jobs.")
+        
+    job = await service.get_job(db=db, job_id=job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    return await service.toggle_saved_job(db=db, job_id=job_id, user_id=current_user.user_id)
+
 @router.get("/{job_id}", response_model=schemas.JobOut)
 async def get_job(
     job_id: int,

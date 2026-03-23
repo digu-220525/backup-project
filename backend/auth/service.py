@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, outerjoin
+from sqlalchemy import func
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
@@ -12,6 +14,9 @@ from google.auth.transport import requests as google_requests
 from config import settings
 from auth.models import User
 from auth.schemas import UserCreate, UserUpdate
+from jobs.models import Job
+from bids.models import Bid
+from projects.models import Project
 from database import get_db
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -40,6 +45,31 @@ async def get_user_by_email(db: AsyncSession, email: str):
 async def get_user_by_id(db: AsyncSession, user_id: int):
     result = await db.execute(select(User).where(User.user_id == user_id))
     return result.scalars().first()
+
+async def get_users(db: AsyncSession, role: Optional[str] = None):
+    # Base query for users
+    q = select(User)
+    if role:
+        q = q.where(User.role == role)
+    
+    result = await db.execute(q)
+    users = result.scalars().all()
+    
+    # Process each user to add a dynamic projects/jobs count
+    for u in users:
+        if u.role == 'freelancer':
+            # Finished projects for freelancers
+            count_res = await db.execute(select(func.count(Project.project_id)).where(Project.freelancer_id == u.user_id, Project.status == 'completed'))
+            u.projects_done = count_res.scalar() or 0
+        else:
+            # Posted jobs for clients
+            count_res = await db.execute(select(func.count(Job.job_id)).where(Job.client_id == u.user_id, Job.status != 'deleted'))
+            u.jobs_posted = count_res.scalar() or 0
+            # Also get completed jobs for success rate calculation
+            done_res = await db.execute(select(func.count(Job.job_id)).where(Job.client_id == u.user_id, Job.status.in_(['completed', 'closed'])))
+            u.jobs_done = done_res.scalar() or 0
+            
+    return users
 
 async def create_user(db: AsyncSession, user: UserCreate):
     hashed_password = get_password_hash(user.password)
@@ -78,10 +108,15 @@ async def update_user(db: AsyncSession, user: User, user_update: UserUpdate):
         user.bio = user_update.bio
     if user_update.skills is not None:
         user.skills = user_update.skills
+    if user_update.profile_picture is not None:
+        user.profile_picture = user_update.profile_picture
+    if user_update.hourly_rate is not None:
+        user.hourly_rate = user_update.hourly_rate
         
     await db.commit()
     await db.refresh(user)
     return user
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -133,3 +168,24 @@ async def google_login(db: AsyncSession, token: str, role: str):
         return user
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid Google token")
+
+async def get_user_stats(db: AsyncSession, user_id: int, role: str):
+    stats = {"projects_done": 0, "proposals_given": 0, "jobs_posted": 0, "jobs_done": 0}
+    if role == 'freelancer':
+        # Projects done
+        res = await db.execute(select(func.count(Project.project_id)).where(Project.freelancer_id == user_id, Project.status == 'completed'))
+        stats["projects_done"] = res.scalar() or 0
+        
+        # Proposals given
+        res = await db.execute(select(func.count(Bid.bid_id)).where(Bid.freelancer_id == user_id))
+        stats["proposals_given"] = res.scalar() or 0
+    else:
+        # Jobs posted
+        res = await db.execute(select(func.count(Job.job_id)).where(Job.client_id == user_id, Job.status != 'deleted'))
+        stats["jobs_posted"] = res.scalar() or 0
+        
+        # Jobs completed (status == 'completed' or 'closed')
+        res = await db.execute(select(func.count(Job.job_id)).where(Job.client_id == user_id, Job.status.in_(['completed', 'closed'])))
+        stats["jobs_done"] = res.scalar() or 0
+
+    return stats

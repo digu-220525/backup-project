@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from auth import schemas, service
 from database import get_db
 from config import settings
+from typing import List, Optional
 
 router = APIRouter()
 
@@ -55,6 +56,14 @@ async def read_user_profile(user_id: int, db: AsyncSession = Depends(get_db)):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
+
+@router.get("/users", response_model=List[schemas.UserOut])
+async def read_users(role: Optional[str] = None, db: AsyncSession = Depends(get_db)):
+    return await service.get_users(db, role)
+
+@router.get("/users/{user_id}/stats", response_model=schemas.UserStats)
+async def read_user_stats(user_id: int, role: str, db: AsyncSession = Depends(get_db)):
+    return await service.get_user_stats(db, user_id, role)
 
 @router.put("/profile", response_model=schemas.UserUpdateOut)
 async def update_user_profile(

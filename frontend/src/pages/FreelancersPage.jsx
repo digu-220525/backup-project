@@ -8,9 +8,8 @@ import {
 import PageBackground from '../components/PageBackground';
 
 const SKILLS = [
-  'All Skills', 'React', 'Python', 'Node.js', 'TypeScript',
-  'Machine Learning', 'UI Design', 'Data Science', 'DevOps',
-  'Django', 'Vue.js', 'AWS', 'MongoDB', 'PostgreSQL',
+  'React', 'Python', 'Node.js', 'TypeScript',
+  'UI Design', 'AWS', 'PostgreSQL',
 ];
 
 const EXPERIENCE = ['Any Level', 'Entry Level', 'Intermediate', 'Expert'];
@@ -36,52 +35,6 @@ const SkeletonCard = () => (
   </div>
 );
 
-// Mock freelancers data since we can't filter by role in the current backend
-const MOCK_FREELANCERS = [
-  {
-    user_id: 'mock-1', name: 'Alex Johnson', role: 'freelancer',
-    bio: 'Full-stack developer with 5 years of experience building modern web applications with React, Node.js, and PostgreSQL.',
-    skills: 'React, Node.js, TypeScript, PostgreSQL, AWS',
-    rating: 4.9, jobs: 48, hourly: 85, location: 'San Francisco, CA',
-    color: 'from-blue-500 to-indigo-600',
-  },
-  {
-    user_id: 'mock-2', name: 'Sofia Martinez', role: 'freelancer',
-    bio: 'UI/UX designer creating stunning interfaces. Specializing in SaaS products and mobile apps.',
-    skills: 'UI Design, Figma, Adobe XD, CSS, React',
-    rating: 5.0, jobs: 62, hourly: 95, location: 'Barcelona, Spain',
-    color: 'from-pink-500 to-rose-600',
-  },
-  {
-    user_id: 'mock-3', name: 'Arjun Sharma', role: 'freelancer',
-    bio: 'Machine Learning engineer specializing in NLP and computer vision. Published researcher with 3 years of industry experience.',
-    skills: 'Python, Machine Learning, TensorFlow, PyTorch, AWS',
-    rating: 4.8, jobs: 31, hourly: 110, location: 'Bangalore, India',
-    color: 'from-emerald-500 to-teal-600',
-  },
-  {
-    user_id: 'mock-4', name: 'Emma Wilson', role: 'freelancer',
-    bio: 'Backend developer building robust APIs and microservices. Expert in Python, Django, and cloud architecture.',
-    skills: 'Python, Django, FastAPI, Docker, PostgreSQL',
-    rating: 4.7, jobs: 39, hourly: 80, location: 'London, UK',
-    color: 'from-amber-500 to-orange-600',
-  },
-  {
-    user_id: 'mock-5', name: 'Lucas Ferreira', role: 'freelancer',
-    bio: 'Mobile developer creating beautiful iOS and Android apps using React Native and Flutter. 4 years experience.',
-    skills: 'React Native, Flutter, iOS, Android, Firebase',
-    rating: 4.9, jobs: 55, hourly: 90, location: 'São Paulo, Brazil',
-    color: 'from-violet-500 to-purple-600',
-  },
-  {
-    user_id: 'mock-6', name: 'Mei Lin', role: 'freelancer',
-    bio: 'Data scientist turning complex data into actionable insights. Expert in visualization and predictive modeling.',
-    skills: 'Python, Data Science, Pandas, SQL, Tableau',
-    rating: 4.8, jobs: 27, hourly: 95, location: 'Singapore',
-    color: 'from-cyan-500 to-blue-600',
-  },
-];
-
 const FreelancerCard = ({ freelancer }) => {
   const skills = typeof freelancer.skills === 'string'
     ? freelancer.skills.split(',').map(s => s.trim()).filter(Boolean)
@@ -96,15 +49,19 @@ const FreelancerCard = ({ freelancer }) => {
 
       <div className="flex items-start gap-6 mb-7 relative z-10">
         {/* Avatar */}
-        <div className={`w-[72px] h-[72px] bg-gradient-to-br ${freelancer.color || 'from-blue-500 to-indigo-600'} rounded-[1.4rem] flex items-center justify-center text-white text-3xl font-black flex-shrink-0 border border-white/[0.1] shadow-xl`}>
-          {freelancer.name.charAt(0)}
+        <div className={`w-[72px] h-[72px] bg-gradient-to-br ${freelancer.color || 'from-blue-500 to-indigo-600'} rounded-[1.4rem] flex items-center justify-center text-white text-3xl font-black flex-shrink-0 border border-white/[0.1] shadow-xl overflow-hidden`}>
+          {freelancer.profile_picture ? (
+            <img src={freelancer.profile_picture} alt={freelancer.name} className="w-full h-full object-cover" />
+          ) : (
+            freelancer.name.charAt(0)
+          )}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <h3 className="text-xl font-black text-white group-hover:text-blue-300 transition-colors uppercase tracking-tight leading-none mb-2 truncate"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                style={{  }}>
                 {freelancer.name}
               </h3>
               {freelancer.location && (
@@ -114,9 +71,9 @@ const FreelancerCard = ({ freelancer }) => {
                 </div>
               )}
             </div>
-            {freelancer.hourly && (
+            {freelancer.hourly_rate && (
               <div className="text-right flex-shrink-0">
-                <p className="text-xl font-black text-white tracking-tight leading-none">${freelancer.hourly}</p>
+                <p className="text-xl font-black text-white tracking-tight leading-none">${freelancer.hourly_rate}</p>
                 <p className="text-[9px] font-black text-white/15 uppercase tracking-[0.2em] mt-1">/hr</p>
               </div>
             )}
@@ -204,10 +161,10 @@ const FreelancersPage = () => {
       try {
         const res = await api.get('/auth/users?role=freelancer');
         const apiFreelancers = res.data || [];
-        const merged = [...MOCK_FREELANCERS, ...apiFreelancers.filter(u => u.role === 'freelancer')];
-        setAllFreelancers(merged);
-      } catch {
-        setAllFreelancers(MOCK_FREELANCERS);
+        setAllFreelancers(apiFreelancers);
+      } catch (err) {
+        console.error("Failed to fetch freelancers:", err);
+        setAllFreelancers([]);
       } finally {
         setLoading(false);
       }
@@ -231,13 +188,23 @@ const FreelancersPage = () => {
       data = data.filter(f => f.skills?.toLowerCase().includes(filters.skill.toLowerCase()));
     }
 
-    if (filters.minRate) data = data.filter(f => (f.hourly || 0) >= Number(filters.minRate));
-    if (filters.maxRate) data = data.filter(f => (f.hourly || 999) <= Number(filters.maxRate));
+    if (filters.experience !== 'Any Level') {
+      data = data.filter(f => {
+        const count = f.projects_done || 0;
+        if (filters.experience === 'Entry Level') return count <= 2;
+        if (filters.experience === 'Intermediate') return count >= 3 && count <= 5;
+        if (filters.experience === 'Expert') return count >= 6;
+        return true;
+      });
+    }
+
+    if (filters.minRate) data = data.filter(f => (f.hourly_rate || 0) >= Number(filters.minRate));
+    if (filters.maxRate) data = data.filter(f => (f.hourly_rate || 999) <= Number(filters.maxRate));
 
     if (filters.sort === 'rating') data.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    else if (filters.sort === 'jobs') data.sort((a, b) => (b.jobs || 0) - (a.jobs || 0));
-    else if (filters.sort === 'rate_low') data.sort((a, b) => (a.hourly || 0) - (b.hourly || 0));
-    else if (filters.sort === 'rate_high') data.sort((a, b) => (b.hourly || 0) - (a.hourly || 0));
+    else if (filters.sort === 'jobs') data.sort((a, b) => (b.projects_done || 0) - (a.projects_done || 0));
+    else if (filters.sort === 'rate_low') data.sort((a, b) => (a.hourly_rate || 0) - (b.hourly_rate || 0));
+    else if (filters.sort === 'rate_high') data.sort((a, b) => (b.hourly_rate || 0) - (a.hourly_rate || 0));
 
     setDisplayed(data);
   }, [filters, allFreelancers]);
@@ -257,7 +224,7 @@ const FreelancersPage = () => {
             <span className="text-blue-400/50 font-black uppercase tracking-[0.4em] text-[9px]">Talent Network</span>
           </div>
           <h1 className="text-5xl sm:text-6xl font-black text-white mb-4 tracking-tight uppercase leading-none"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.04em' }}>
+            style={{  letterSpacing: '-0.04em' }}>
             Find Talent
           </h1>
           <p className="text-white/25 font-bold text-sm uppercase tracking-[0.3em]">
@@ -329,18 +296,18 @@ const FreelancersPage = () => {
                   )}
                 </div>
 
-                {/* Skills */}
+                {/* Quick Skills Pick */}
                 <div className="mb-7">
-                  <label className="text-[9px] font-black text-white/25 uppercase tracking-[0.25em] mb-4 block">Skills</label>
-                  <div className="space-y-1.5">
-                    {SKILLS.map(skill => (
+                  <label className="text-[9px] font-black text-white/25 uppercase tracking-[0.25em] mb-4 block">Popular Skills</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['All Skills', ...SKILLS].map(skill => (
                       <button
                         key={skill}
                         onClick={() => updateFilter('skill', skill)}
-                        className={`w-full text-left text-[10px] px-4 py-2.5 rounded-xl transition-all font-bold uppercase tracking-widest ${
+                        className={`text-[9px] px-3 py-1.5 rounded-lg transition-all font-black uppercase tracking-widest border ${
                           filters.skill === skill
-                            ? 'bg-blue-600/[0.12] text-blue-300 border border-blue-500/[0.2]'
-                            : 'text-white/30 border border-transparent hover:bg-white/[0.04] hover:text-white'
+                            ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
+                            : 'bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white'
                         }`}
                       >
                         {skill}
@@ -409,7 +376,7 @@ const FreelancersPage = () => {
                   <Users className="w-7 h-7 text-white/[0.1]" />
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-3"
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}>No freelancers found</h3>
+                  style={{  }}>No freelancers found</h3>
                 <p className="text-white/20 text-[10px] font-bold uppercase tracking-widest mb-8 max-w-xs mx-auto leading-relaxed">
                   Try adjusting your search filters.
                 </p>

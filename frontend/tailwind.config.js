@@ -35,6 +35,8 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['"Inter Tight"', 'system-ui', '-apple-system', 'sans-serif'],
+        accent: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

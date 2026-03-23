@@ -16,3 +16,18 @@ class SupportTicket(Base):
 
     # Relationship to User (optional, since it's nullable)
     user = relationship("User")
+
+class Dispute(Base):
+    __tablename__ = "disputes"
+
+    dispute_id = Column(Integer, primary_key=True, index=True)
+    job_id = Column(Integer, ForeignKey("jobs.job_id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
+    raised_by_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    reason = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    status = Column(String, default="open") # open, resolved_refund, resolved_pay
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Note: For actual chat/messages and submitted files, we can just say they use the existing project/job mechanisms,
+    # or we can store JSON in description/files. Let's just keep it simple with reasoning and description.

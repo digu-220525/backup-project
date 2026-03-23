@@ -2,33 +2,84 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { 
-  Activity, FileText, AlertTriangle, Briefcase, Upload, CheckCircle, 
-  Star, ArrowLeft, User, Users, Clock, DollarSign, ShieldCheck
+import {
+  Activity, FileText, AlertTriangle, Briefcase, Upload, CheckCircle,
+  Star, ArrowLeft, User, Users, Calendar, ShieldCheck, RotateCcw,
+  Flag, Lock, DollarSign, Zap, MessageSquare
 } from 'lucide-react';
-import PageBackground from '../components/PageBackground';
 
-const StatusBadge = ({ status }) => {
-  const map = {
-    active: ['bg-blue-600 text-white border-blue-400', 'MISSION ACTIVE'],
-    work_submitted: ['bg-amber-600 text-white border-amber-400', 'INTEL SUBMITTED'],
-    completed: ['bg-indigo-600 text-white border-indigo-400', 'MISSION COMPLETE'],
-    pending: ['bg-[#1e293b] text-white/60 border-[#2563EB]/20', 'PENDING SYNC'],
+/* ─── Status pill ─────────────────────────────────────────────────────────── */
+const StatusPill = ({ status }) => {
+  const cfg = {
+    active:         { bg: 'bg-blue-500/15 text-blue-400 border-blue-500/25',     dot: 'bg-blue-400',    label: 'Active'          },
+    work_submitted: { bg: 'bg-amber-500/15 text-amber-400 border-amber-500/25',  dot: 'bg-amber-400',   label: 'Under Review'    },
+    completed:      { bg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25', dot: 'bg-emerald-400', label: 'Completed'   },
+    pending_escrow: { bg: 'bg-purple-500/15 text-purple-400 border-purple-500/25', dot: 'bg-purple-400', label: 'Awaiting Escrow'},
+    in_dispute:     { bg: 'bg-red-500/15 text-red-400 border-red-500/25',        dot: 'bg-red-400',     label: 'In Dispute'      },
   };
-  const [cls, label] = map[status] || ['bg-[#1e293b]/5 text-white/90 border-[#2563EB]/20', status?.toUpperCase()];
+  const c = cfg[status] || { bg: 'bg-white/10 text-white/50 border-white/10',   dot: 'bg-white/30',    label: status };
   return (
-    <span className={`inline-flex items-center px-6 py-2.5 rounded-full text-base font-bold uppercase tracking-widest border ${cls}`}>
-      {label}
+    <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border tracking-wide ${c.bg}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${c.dot} ${status === 'active' ? 'animate-pulse' : ''}`} />
+      {c.label}
     </span>
   );
 };
 
+/* ─── Timeline step ───────────────────────────────────────────────────────── */
+const TimelineStep = ({ icon: Icon, label, sublabel, done, active, isLast }) => (
+  <div className="flex gap-4 relative">
+    {!isLast && (
+      <div className={`absolute left-4 top-9 bottom-0 w-px ${done ? 'bg-indigo-500/40' : 'bg-white/[0.06]'}`} />
+    )}
+    <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 transition-all z-10 ${
+      done    ? 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-400' :
+      active  ? 'bg-white/10 border border-white/20 text-white/60' :
+                'bg-white/[0.04] border border-white/[0.06] text-white/20'
+    }`}>
+      {done ? <CheckCircle size={14} /> : <Icon size={14} />}
+    </div>
+    <div className="pb-7">
+      <p className={`text-sm font-semibold ${done ? 'text-white' : active ? 'text-white/50' : 'text-white/20'}`}>{label}</p>
+      {sublabel && <p className="text-xs text-white/25 font-medium mt-0.5">{sublabel}</p>}
+    </div>
+  </div>
+);
+
+/* ─── Info card ───────────────────────────────────────────────────────────── */
+const InfoCard = ({ icon: Icon, label, value, accent }) => (
+  <div className="rounded-2xl p-4 border border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
+    <div className="flex items-center gap-2.5 mb-3">
+      <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${accent}`}>
+        <Icon size={13} />
+      </div>
+      <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">{label}</p>
+    </div>
+    <p className="text-sm font-bold text-white leading-snug">{value}</p>
+  </div>
+);
+
+/* ─── Modal shell ─────────────────────────────────────────────────────────── */
+const Modal = ({ onClose, children, accentClass = 'border-white/10' }) => (
+  <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl">
+    <div className={`relative bg-[#0c1120] border ${accentClass} rounded-[28px] p-8 max-w-md w-full shadow-2xl`}>
+      {children}
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 const ProjectDashboard = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [showApproveModal, setShowApproveModal]   = useState(false);
+  const [showDisputeModal, setShowDisputeModal]   = useState(false);
+  const [disputeReason, setDisputeReason]         = useState('');
+  const [disputeDesc,   setDisputeDesc]           = useState('');
+  const [actionLoading, setActionLoading]         = useState(false);
+  const [actionError,   setActionError]           = useState('');
   const navigate = useNavigate();
 
   const fetchProject = async () => {
@@ -45,237 +96,356 @@ const ProjectDashboard = () => {
 
   useEffect(() => { fetchProject(); }, [id]);
 
-  const handleApprove = () => {
-    setShowApproveModal(true);
+  /* actions */
+  const confirmApproval = async () => {
+    setActionLoading(true); setActionError('');
+    try {
+      await api.put(`/projects/${id}/approve`);
+      setShowApproveModal(false);
+      await fetchProject();
+      navigate(`/projects/${id}/review`);
+    } catch (err) {
+      setActionError(err.response?.data?.detail || 'Approval failed.');
+      setActionLoading(false);
+    }
   };
 
-  const confirmApproval = () => {
-    setShowApproveModal(false);
-    navigate(`/projects/${id}/payment`);
+  const handleRequestChanges = async () => {
+    setActionLoading(true);
+    try {
+      await api.put(`/projects/${id}/request-changes`);
+      await fetchProject();
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to request changes.');
+    } finally { setActionLoading(false); }
   };
 
+  const handleSubmitDispute = async () => {
+    if (!disputeReason.trim() || !disputeDesc.trim()) return;
+    setActionLoading(true);
+    try {
+      await api.post(`/projects/${id}/dispute`, { reason: disputeReason, description: disputeDesc });
+      setShowDisputeModal(false);
+      await fetchProject();
+    } catch (err) {
+      setActionError(err.response?.data?.detail || 'Failed to raise dispute.');
+    } finally { setActionLoading(false); }
+  };
+
+  /* ── loading ── */
   if (loading) return (
-    <div className="min-h-screen pt-24 bg-[#0f172a] relative">
-      <PageBackground variant="dark" />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse relative z-10">
-        <div className="bg-[#1e293b]/5 rounded-2xl p-8 border border-[#2563EB]/20">
-          <div className="h-8 bg-[#1e293b]/10 rounded w-48 mb-4"></div>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="h-20 bg-[#1e293b]/10 rounded-xl"></div>
-            <div className="h-20 bg-[#1e293b]/10 rounded-xl"></div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#070e1c] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
+  /* ── 404 ── */
   if (!project) return (
-    <div className="min-h-screen pt-24 relative flex items-center justify-center">
-      <PageBackground variant="dark" />
-      <div className="text-center relative z-10">
-        <AlertTriangle className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-        <h2 className="text-xl font-black text-white uppercase tracking-tighter">Mission Archive Exception</h2>
-        <p className="text-blue-100/90 text-sm uppercase font-black tracking-widest mt-2 px-10">The requested data node [PROJECT_ID: {id}] could not be located in the central registry.</p>
-        <Link to="/dashboard" className="text-blue-600 font-bold text-sm uppercase tracking-widest mt-8 inline-block hover:text-white transition-colors">← RETURN_TO_HUB</Link>
-      </div>
+    <div className="min-h-screen bg-[#070e1c] flex items-center justify-center flex-col gap-4 text-center px-4">
+      <AlertTriangle size={40} className="text-white/20" />
+      <h2 className="text-lg font-bold text-white">Project not found</h2>
+      <p className="text-sm text-white/35">No project with ID #{id} was found in your account.</p>
+      <Link to="/dashboard" className="mt-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
+        ← Back to Dashboard
+      </Link>
     </div>
   );
 
-  const isClient = user?.role === 'client' && user?.user_id === project.client_id;
+  const isClient     = user?.role === 'client'     && user?.user_id === project.client_id;
   const isFreelancer = user?.role === 'freelancer' && user?.user_id === project.freelancer_id;
-  const isCompleted = project.status === 'completed';
+  const isCompleted  = project.status === 'completed';
+  const isPendingEscrow = project.status === 'pending_escrow';
+  const isInDispute  = project.status === 'in_dispute';
+  const isSubmitted  = project.status === 'work_submitted';
 
-  const timeline = [
-    { label: 'Project Created', done: true, icon: <Briefcase className="w-4 h-4" /> },
-    { label: 'Work In Progress', done: project.status !== 'pending', icon: <Activity className="w-4 h-4" /> },
-    { label: 'Work Submitted', done: ['work_submitted', 'completed'].includes(project.status), icon: <Upload className="w-4 h-4" /> },
-    { label: 'Client Review', done: ['completed'].includes(project.status), icon: <CheckCircle className="w-4 h-4" /> },
-    { label: 'Completed', done: isCompleted, icon: <Star className="w-4 h-4" /> },
+  const steps = [
+    { icon: Briefcase, label: 'Project Created',    sublabel: project.start_date ? new Date(project.start_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : null, done: true },
+    { icon: Lock,      label: 'Escrow Funded',       sublabel: 'Client deposited funds',   done: !isPendingEscrow },
+    { icon: Zap,       label: 'Work In Progress',    sublabel: 'Freelancer working',       done: ['active','work_submitted','completed','in_dispute'].includes(project.status) },
+    { icon: Upload,    label: 'Work Delivered',      sublabel: 'Awaiting client review',   done: ['work_submitted','completed'].includes(project.status) },
+    { icon: CheckCircle,label:'Approved & Paid',     sublabel: 'Funds released',           done: isCompleted },
   ];
 
   return (
-    <div className="min-h-screen pt-20 relative">
-      <PageBackground variant="dark" />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        <div className="mb-10">
-          <Link to="/dashboard" className="inline-flex items-center gap-3 text-base font-bold text-blue-100/90 hover:text-white transition-all uppercase tracking-widest group">
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Dashboard
-          </Link>
-        </div>
+    <div className="min-h-screen bg-[#070e1c] pt-20 pb-16">
 
-        {/* Header */}
-        <div className="bg-[#111827]/40 backdrop-blur-3xl rounded-[3rem] border border-[#2563EB]/10 p-12 mb-10 animate-fade-in relative z-10 overflow-hidden shadow-3xl">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[150px] rounded-full -mr-48 -mt-48 pointer-events-none"></div>
-          
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12 relative z-10">
+      {/* ── page wrapper ── */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        {/* back */}
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-white/35 hover:text-white transition-colors mb-8 group"
+        >
+          <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
+          Dashboard
+        </Link>
+
+        {/* ── HEADER CARD ── */}
+        <div
+          className="rounded-[28px] p-7 mb-5 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(145deg,rgba(99,102,241,0.08),rgba(99,102,241,0.02))',
+            border: '1px solid rgba(99,102,241,0.15)',
+          }}
+        >
+          {/* bg glow */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+
+          {/* top row */}
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-6xl font-black text-white mb-4 leading-none tracking-tighter uppercase">
-                MISSION BRIEF <span className="text-blue-500 tracking-widest ml-4">#{project.project_id}</span>
+              <div className="flex items-center gap-3 mb-1.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
+                  <Briefcase size={15} />
+                </div>
+                <p className="text-xs font-bold text-indigo-400/70 uppercase tracking-widest">Project #{project.project_id}</p>
+              </div>
+              <h1 className="text-2xl font-black text-white tracking-tight">
+                {project.job_title || `Job #${project.job_id}`}
               </h1>
-              <div className="flex items-center gap-4">
-                <span className="h-[2px] w-12 bg-blue-500/40"></span>
-                <p className="text-blue-100/90 font-bold text-sm uppercase tracking-widest">OPERATIONAL DATA LINK: {project.job_id}</p>
-              </div>
+              {project.job_budget && (
+                <p className="text-sm text-white/35 font-semibold mt-1 flex items-center gap-1.5">
+                  <DollarSign size={13} />
+                  {Number(project.job_budget).toLocaleString()} contract value
+                </p>
+              )}
             </div>
-            <StatusBadge status={project.status} />
-          </div>
-
-          {/* Info Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 relative z-10">
-            <div className="bg-[#1e293b]/2 backdrop-blur-3xl border border-[#2563EB]/10 rounded-[2rem] p-8 hover:bg-[#1e293b]/5 transition-all">
-              <p className="text-base font-bold text-white/70 uppercase tracking-widest mb-6">COMMANDER</p>
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-blue-600/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
-                  <User className="w-6 h-6 text-blue-400" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-white uppercase tracking-widest mb-1">NODE #{project.client_id}</span>
-                  {isClient && <span className="text-sm font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 w-fit">ACTIVE UNIT</span>}
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#1e293b]/2 backdrop-blur-3xl border border-[#2563EB]/10 rounded-[2rem] p-8 hover:bg-[#1e293b]/5 transition-all">
-              <p className="text-base font-bold text-white/70 uppercase tracking-widest mb-6">OPERATIVE</p>
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-emerald-600/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
-                  <Users className="w-6 h-6 text-emerald-400" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-white uppercase tracking-widest mb-1">NODE #{project.freelancer_id}</span>
-                  {isFreelancer && <span className="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 w-fit">ACTIVE UNIT</span>}
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#1e293b]/2 backdrop-blur-3xl border border-[#2563EB]/10 rounded-[2rem] p-8 hover:bg-[#1e293b]/5 transition-all">
-              <p className="text-base font-bold text-white/70 uppercase tracking-widest mb-6">DEPLOYMENT DATE</p>
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-[#1e293b]/5 rounded-2xl flex items-center justify-center border border-[#2563EB]/10">
-                  <Clock className="w-6 h-6 text-white/90" />
-                </div>
-                <span className="text-sm font-bold text-white uppercase tracking-wider">
-                  {project.start_date ? new Date(project.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'PENDING SYNC'}
-                </span>
-              </div>
+            <div className="flex items-center gap-3">
+              <StatusPill status={project.status} />
+              {!isPendingEscrow && (
+                <Link
+                  to={`/messages/${user.role === 'client' ? project.freelancer_id : project.client_id}`}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border border-indigo-500/25 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors"
+                >
+                  <MessageSquare size={13} />
+                  Message
+                </Link>
+              )}
             </div>
           </div>
 
-          {/* Work Notes */}
+          {/* info grid */}
+          <div className="grid sm:grid-cols-3 gap-3 mb-6">
+            <InfoCard
+              icon={User}
+              label="Client"
+              value={isClient ? 'You' : `User #${project.client_id}`}
+              accent="bg-blue-500/15 border border-blue-500/20 text-blue-400"
+            />
+            <InfoCard
+              icon={Users}
+              label="Freelancer"
+              value={isFreelancer ? 'You' : `User #${project.freelancer_id}`}
+              accent="bg-emerald-500/15 border border-emerald-500/20 text-emerald-400"
+            />
+            <InfoCard
+              icon={Calendar}
+              label="Started"
+              value={project.start_date
+                ? new Date(project.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                : 'Not started yet'}
+              accent="bg-white/10 border border-white/10 text-white/50"
+            />
+          </div>
+
+          {/* work notes */}
           {project.work_notes && (
-            <div className="mb-10 bg-blue-600/5 border border-blue-500/10 rounded-2xl p-8 relative z-10 backdrop-blur-xl">
-              <div className="flex items-center gap-3 mb-4">
-                <FileText className="w-5 h-5 text-blue-400" />
-                <h3 className="font-black text-blue-400 text-sm uppercase tracking-widest">Submission Notes</h3>
+            <div className="mb-6 rounded-2xl p-4 border border-white/[0.07] bg-white/[0.02]">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText size={13} className="text-indigo-400" />
+                <p className="text-xs font-bold text-indigo-400 uppercase tracking-wide">Delivery Notes</p>
               </div>
-              <p className="text-slate-300 text-base leading-relaxed whitespace-pre-wrap italic font-medium">"{project.work_notes}"</p>
+              <p className="text-sm text-white/60 font-medium leading-relaxed">"{project.work_notes}"</p>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex flex-wrap gap-4 pt-8 border-t border-[#2563EB]/10 justify-end relative z-10">
+          {/* ── ACTION BAR ── */}
+          <div className="flex flex-wrap items-center gap-3 pt-5 border-t border-white/[0.06]">
+
+            {/* Freelancer → submit */}
             {isFreelancer && project.status === 'active' && (
               <Link
                 to={`/projects/${project.project_id}/submit`}
-                className="inline-flex items-center gap-4 bg-gradient-to-r from-[#2563EB] to-[#9B2C8C] text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:shadow-[0_0_25px_rgba(155,44,140,0.6)] border border-blue-500/20 font-black px-10 py-4 rounded-2xl hover: transition-all active:scale-95 text-sm uppercase tracking-widest"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-black text-white transition-all active:scale-95"
+                style={{ background: 'linear-gradient(135deg,#6366f1,#4f46e5)', boxShadow: '0 4px 20px rgba(99,102,241,0.3)' }}
               >
-                <Upload className="w-4 h-4" />
-                Submit Finished Work
+                <Upload size={14} />
+                Submit Delivery
               </Link>
             )}
 
-            {isClient && project.status === 'work_submitted' && (
-              <button
-                onClick={handleApprove}
-                className="inline-flex items-center gap-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 text-sm uppercase tracking-widest hover:"
+            {/* Client → fund escrow */}
+            {isClient && isPendingEscrow && (
+              <Link
+                to={`/projects/${project.project_id}/escrow`}
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-black text-white transition-all active:scale-95"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', boxShadow: '0 4px 20px rgba(124,58,237,0.3)' }}
               >
-                <CheckCircle className="w-4 h-4" />
-                Final Approval
-              </button>
+                <Lock size={14} />
+                Fund Escrow
+              </Link>
             )}
 
+            {/* Client → 3 actions on submission */}
+            {isClient && isSubmitted && (
+              <>
+                <button
+                  onClick={() => setShowDisputeModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-red-500/25 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                >
+                  <Flag size={13} />
+                  Raise Dispute
+                </button>
+                <button
+                  onClick={handleRequestChanges}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-amber-500/25 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                >
+                  <RotateCcw size={13} />
+                  Request Changes
+                </button>
+                <button
+                  onClick={() => setShowApproveModal(true)}
+                  className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-black text-white transition-all active:scale-95 ml-auto"
+                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)', boxShadow: '0 4px 20px rgba(16,185,129,0.25)' }}
+                >
+                  <CheckCircle size={14} />
+                  Approve & Release
+                </button>
+              </>
+            )}
+
+            {/* Completed → review */}
             {isCompleted && (
               <Link
                 to={`/projects/${project.project_id}/review`}
-                className="inline-flex items-center gap-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 text-sm uppercase tracking-widest hover:shadow-lg"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-black text-white transition-all active:scale-95"
+                style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)', boxShadow: '0 4px 20px rgba(245,158,11,0.25)' }}
               >
-                <Star className="w-4 h-4" />
+                <Star size={14} />
                 Leave a Review
               </Link>
+            )}
+
+            {/* In dispute */}
+            {isInDispute && (
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-red-500/25 bg-red-500/10 text-red-400">
+                <Flag size={13} />
+                Dispute Under Review
+              </div>
             )}
           </div>
         </div>
 
-        {/* Progress Timeline */}
-        <div className="bg-[#111827]/40 backdrop-blur-3xl rounded-[3rem] border border-[#2563EB]/10 p-12 animate-fade-in relative z-10 shadow-3xl">
-          <h2 className="text-sm font-bold text-blue-500 uppercase tracking-widest mb-12 flex items-center gap-4">
-            <Activity className="w-6 h-6 opacity-40" />
-            MISSION PROTOCOL MAP
-          </h2>
-          <div className="relative">
-            {/* Connector line */}
-            <div className="absolute left-8 top-8 bottom-8 w-[2px] bg-[#1e293b]/5"></div>
-            <div className="space-y-12">
-              {timeline.map((step, i) => (
-                <div key={i} className="flex items-start gap-10 relative z-10 group">
-                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center flex-shrink-0 transition-all duration-700 border ${
-                    step.done
-                      ? 'bg-blue-600 text-white border-blue-400 scale-110'
-                      : 'bg-[#1e293b]/2 text-white/10 border-[#2563EB]/10 scale-100 group-hover:scale-105 group-hover:bg-[#1e293b]/5'
-                  }`}>
-                    {React.cloneElement(step.icon, { className: 'w-6 h-6' })}
-                  </div>
-                  <div className="flex-1 pt-4">
-                    <p className={`text-base font-bold uppercase tracking-widest ${step.done ? 'text-white' : 'text-white/10'}`}>
-                      {step.label}
-                    </p>
-                    {step.done && (
-                      <p className="text-sm font-bold text-emerald-500/60 uppercase tracking-widest mt-2">VERIFIED // COMPLETE</p>
-                    )}
-                  </div>
-                  {step.done && (
-                    <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20 mt-4">
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+        {/* ── TIMELINE CARD ── */}
+        <div
+          className="rounded-[28px] p-7"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.07)',
+          }}
+        >
+          <div className="flex items-center gap-2.5 mb-7">
+            <Activity size={15} className="text-white/30" />
+            <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest">Progress Timeline</h2>
+          </div>
+
+          <div>
+            {steps.map((step, i) => (
+              <TimelineStep
+                key={i}
+                icon={step.icon}
+                label={step.label}
+                sublabel={step.sublabel}
+                done={step.done}
+                active={!step.done && (i === 0 || steps[i - 1]?.done)}
+                isLast={i === steps.length - 1}
+              />
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Modal Confirmation Overlay */}
+      {/* ═══ APPROVE MODAL ═══ */}
       {showApproveModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-2xl animate-fade-in">
-          <div className="bg-slate-900 border border-[#2563EB]/20 rounded-[2.5rem] p-10 max-w-md w-full shadow-3xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full -mr-16 -mt-16"></div>
-            
-            <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-8 border border-emerald-500/20">
-              <ShieldCheck className="w-8 h-8 text-emerald-400" />
-            </div>
-            
-            <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Final Validation</h3>
-            <p className="text-blue-100/90 text-base font-bold uppercase tracking-wider leading-relaxed mb-10">
-              This will release the escrowed funds to the operative. Please ensure all mission deliverables meet your requirements. 
-              You will be redirected to the secure payment node for authorization.
-            </p>
-            
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setShowApproveModal(false)}
-                className="flex-1 py-4 bg-[#1e293b]/5 hover:bg-[#1e293b]/10 text-white/90 hover:text-white font-bold text-base uppercase tracking-widest rounded-xl transition-all"
-              >
-                Abort
-              </button>
-              <button 
-                onClick={confirmApproval}
-                className="flex-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-500/20"
-              >
-                Proceed to Payment
-              </button>
-            </div>
+        <Modal onClose={() => { setShowApproveModal(false); setActionError(''); }} accentClass="border-emerald-500/20">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5">
+            <ShieldCheck size={22} />
           </div>
-        </div>
+          <h3 className="text-xl font-black text-white mb-2 tracking-tight">Approve & Release Funds</h3>
+          <p className="text-sm text-white/40 font-medium leading-relaxed mb-6">
+            Confirming approval will mark this project as <span className="text-emerald-400 font-bold">complete</span> and
+            release the escrowed funds to the freelancer. You'll then be prompted to leave a review.
+          </p>
+          {actionError && (
+            <p className="text-red-400 text-xs font-bold mb-4 p-3 bg-red-500/10 rounded-xl border border-red-500/20">{actionError}</p>
+          )}
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setShowApproveModal(false); setActionError(''); }}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-bold text-sm rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmApproval}
+              disabled={actionLoading}
+              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {actionLoading && <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              Confirm Approval
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* ═══ DISPUTE MODAL ═══ */}
+      {showDisputeModal && (
+        <Modal onClose={() => { setShowDisputeModal(false); setActionError(''); }} accentClass="border-red-500/20">
+          <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-5">
+            <Flag size={22} />
+          </div>
+          <h3 className="text-xl font-black text-white mb-2 tracking-tight">Raise a Dispute</h3>
+          <p className="text-sm text-white/35 font-medium leading-relaxed mb-6">
+            Funds will remain <span className="text-red-400 font-bold">locked</span> until the dispute is reviewed and resolved by the platform team.
+          </p>
+          {actionError && (
+            <p className="text-red-400 text-xs font-bold mb-4 p-3 bg-red-500/10 rounded-xl border border-red-500/20">{actionError}</p>
+          )}
+          <div className="space-y-3 mb-6">
+            <input
+              type="text"
+              placeholder="Reason (e.g. Work not delivered as agreed)"
+              value={disputeReason}
+              onChange={e => setDisputeReason(e.target.value)}
+              className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm font-medium placeholder-white/20 focus:outline-none focus:border-red-500/40 transition-colors"
+            />
+            <textarea
+              rows={4}
+              placeholder="Describe the issue in detail..."
+              value={disputeDesc}
+              onChange={e => setDisputeDesc(e.target.value)}
+              className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm font-medium placeholder-white/20 focus:outline-none focus:border-red-500/40 transition-colors resize-none"
+            />
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setShowDisputeModal(false); setActionError(''); }}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-bold text-sm rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmitDispute}
+              disabled={actionLoading || !disputeReason.trim() || !disputeDesc.trim()}
+              className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {actionLoading && <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              Submit Dispute
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

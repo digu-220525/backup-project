@@ -15,6 +15,7 @@ class Project(Base):
     work_notes: Mapped[str] = mapped_column(Text, nullable=True)
     start_date: Mapped[date] = mapped_column(Date, server_default=func.current_date())
     end_date: Mapped[date] = mapped_column(Date, nullable=True)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     job = relationship("Job")

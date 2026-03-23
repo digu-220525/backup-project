@@ -1,14 +1,14 @@
-# VantagePoint - Premium Freelance Marketplace Platform
+# Nexlance - Freelance Marketplace Platform
 
-A professional, industry-standard freelance marketplace platform where **Clients** post high-quality projects and **Freelancers** compete to deliver excellence. Designed with a modern, dark-themed aesthetic and built on a robust, asynchronous architecture.
+A professional, industry-standard freelance marketplace platform where **Clients** post high-quality projects and **Freelancers** compete to deliver excellence. Designed with a modern, premium dark-themed glassmorphic aesthetic and built on a robust, asynchronous architecture.
 
-Built with **FastAPI + React + PostgreSQL/SQLite** by a dedicated team of 6 engineering students.
+Built with **FastAPI + React + PostgreSQL** by a dedicated team of engineers.
 
 ---
 
 ## 🏗️ System Architecture
 
-VantagePoint follows a modern micro-monolith approach with a clear separation between the presentation layer and the business logic.
+Nexlance follows a modern micro-monolith approach with a clear separation between the presentation layer and the business logic.
 
 ```text
 Browser → React (Vite, :5173) → FastAPI (:8000) → PostgreSQL (Primary) / SQLite (Dev)
@@ -34,10 +34,11 @@ freelance-marketplace-platform/
 │   ├── jobs/                  # Job Lifecycle & Discovery
 │   ├── bids/                  # Competitive Proposal System
 │   ├── projects/              # Active Workflow & Delivery Management
+│   ├── messages/              # Direct User-to-User Messaging
 │   ├── payments/              # Simulated Escrow & Security System
 │   ├── reviews/               # Reputation & Rating Module
-│   ├── notifications/         # Real-time User Alert System (NEW)
-│   └── support/               # Complaints & Ticket Management (NEW)
+│   ├── notifications/         # Real-time User Alert System
+│   └── support/               # Complaints & Ticket Management
 ├── frontend/                  # Responsive React Application
 │   ├── src/
 │   │   ├── pages/             # Feature-driven page components
@@ -76,7 +77,7 @@ pip install -r requirements.txt
 cp ../.env.example .env
 
 # 4. Service Launch
-uvicorn main:app --reload
+  uvicorn main:app --reload
 # → API: http://localhost:8000
 # → Docs: http://localhost:8000/docs
 ```
@@ -98,7 +99,7 @@ npm run dev
 
 ## 🗄️ Database Strategy: PostgreSQL
 
-VantagePoint is optimized for **PostgreSQL** to handle production-level transaction volumes.
+Nexlance is optimized for **PostgreSQL** to handle production-level transaction volumes.
 
 ### 1. Instance Configuration
 
@@ -107,19 +108,19 @@ VantagePoint is optimized for **PostgreSQL** to handle production-level transact
 sudo apt update && sudo apt install postgresql postgresql-contrib
 sudo service postgresql start
 
-# Create the VantagePoint Instance
+# Create the Nexlance Instance
 sudo -u postgres psql
-# CREATE USER vantagepoint_user WITH PASSWORD 'vantage_secure_password';
-# CREATE DATABASE vantagepoint_db OWNER vantagepoint_user;
+# CREATE USER nexlance_user WITH PASSWORD 'nexlance_secure_password';
+# CREATE DATABASE nexlance_db OWNER nexlance_user;
 ```
 
 #### **🪟 Windows**
 1. Install PostgreSQL from [postgresql.org](https://www.postgresql.org/download/windows/).
 2. Run SQL Shell (psql) or pgAdmin:
 ```sql
-CREATE DATABASE vantagepoint_db;
-CREATE USER vantagepoint_user WITH PASSWORD 'vantage_secure_password';
-GRANT ALL PRIVILEGES ON DATABASE vantagepoint_db TO vantagepoint_user;
+CREATE DATABASE nexlance_db;
+CREATE USER nexlance_user WITH PASSWORD 'nexlance_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE nexlance_db TO nexlance_user;
 ```
 
 ### 2. Integration & Migration

@@ -14,10 +14,11 @@ from projects.models import Project
 from payments.models import Transaction
 from reviews.models import Review
 from notifications.models import Notification
-from support.models import SupportTicket
+from support.models import SupportTicket, Dispute
+from messages.models import Message
 
 async def migrate():
-    print("VantagePoint Protocol: Database Migration Initialized...")
+    print("Nexlance Protocol: Database Migration Initialized...")
     print(f"Targeting: {engine.url}")
     
     try:
@@ -30,7 +31,7 @@ async def migrate():
             print("Executing: CREATE ALL TABLES")
             await conn.run_sync(Base.metadata.create_all)
             
-        print("\nSUCCESS: VantagePoint Database has been migrated to PostgreSQL.")
+        print("\nSUCCESS: Nexlance Database has been migrated to PostgreSQL.")
         print("Note: If using JSONB or specific PG extensions, ensure they are enabled in your instance.")
     except Exception as e:
         print(f"\nCRITICAL FAILURE: {str(e)}")

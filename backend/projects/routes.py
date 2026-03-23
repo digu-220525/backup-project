@@ -46,3 +46,22 @@ async def approve_work(
     if current_user.role != 'client':
         raise HTTPException(status_code=403, detail="Only clients can approve work.")
     return await service.approve_work(db=db, project_id=project_id, client_id=current_user.user_id)
+
+@router.put("/{project_id}/request-changes", response_model=schemas.ProjectOut)
+async def request_changes(
+    project_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'client':
+        raise HTTPException(status_code=403, detail="Only clients can request changes.")
+    return await service.request_changes(db=db, project_id=project_id, client_id=current_user.user_id)
+
+@router.post("/{project_id}/dispute", status_code=status.HTTP_201_CREATED)
+async def raise_dispute(
+    project_id: int,
+    dispute: schemas.DisputeCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    return await service.raise_dispute(db=db, project_id=project_id, user_id=current_user.user_id, dispute=dispute)

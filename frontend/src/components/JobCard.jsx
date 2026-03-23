@@ -19,7 +19,7 @@ const JobCard = ({ job, showDetailsBtn = true }) => {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-5 relative z-10">
         <h3 className="text-lg font-black text-white group-hover:text-blue-300 transition-colors leading-snug tracking-tight uppercase"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          style={{  }}>
           {job.title}
         </h3>
         <span className={`flex items-center gap-1.5 px-3 py-1 text-[9px] rounded-full border font-black uppercase tracking-[0.2em] flex-shrink-0 ${cfg.cls}`}>

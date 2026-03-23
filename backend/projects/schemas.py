@@ -25,3 +25,7 @@ class ProjectOut(ProjectBase):
 
     class Config:
         from_attributes = True
+
+class DisputeCreate(BaseModel):
+    reason: str
+    description: str

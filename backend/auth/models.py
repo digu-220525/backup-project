@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from sqlalchemy import Integer, String, Text, DateTime, func # type: ignore
+from sqlalchemy import Integer, String, Text, DateTime, func, Numeric # type: ignore
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database import Base # type: ignore
@@ -15,4 +15,6 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20), nullable=False)
     bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     skills: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    profile_picture: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    hourly_rate: Mapped[Optional[float]] = mapped_column(Numeric(12, 2), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

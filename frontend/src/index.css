@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,15 +6,20 @@
 @layer base {
   * {
     box-sizing: border-box;
-    cursor: crosshair;
   }
 
   body {
+    @apply bg-[#020617] text-[#cbd5e1] antialiased selection:bg-blue-500/30 selection:text-blue-200;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    @apply bg-slate-950 text-slate-100 antialiased selection:bg-blue-500/30 selection:text-blue-200;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.7; /* Increased for readability */
     scroll-behavior: smooth;
     letter-spacing: -0.01em;
     position: relative;
+    /* Smooth font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Cinematic Grain */
@@ -29,9 +34,44 @@
     pointer-events: none;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-black tracking-tighter uppercase;
-    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  /* ── Typography Scale ── */
+  /* Using @apply so utilities can override these safely */
+
+  h1, .text-h1 {
+    @apply font-heading font-[800] leading-[1.1] tracking-[-0.02em] text-[#F8FAFC];
+    font-size: clamp(56px, 6vw, 72px);
+  }
+
+  h2, .text-h2 {
+    @apply font-heading font-[700] leading-[1.25] tracking-[-0.015em] text-[#F1F5F9];
+    font-size: clamp(36px, 4vw, 44px);
+  }
+
+  h3, .text-h3 {
+    @apply font-heading font-[600] leading-[1.35] tracking-[-0.01em] text-[#E2E8F0];
+    font-size: clamp(24px, 3vw, 28px);
+  }
+
+  h4, h5, h6 {
+    @apply font-heading font-[600] text-[#E2E8F0];
+  }
+
+  p, .text-body {
+    @apply font-sans font-[400] leading-[1.7] text-[#cbd5e1];
+    font-size: clamp(16px, 2vw, 18px); /* slightly fluid */
+  }
+
+  small, .text-meta {
+    @apply font-sans font-[400] text-[#94a3b8];
+    font-size: 13.5px;
+  }
+
+  button, .btn {
+    @apply font-sans font-[600] tracking-[0.02em];
+  }
+
+  label, input, select, textarea {
+    @apply font-sans font-[500] text-[15px] tracking-wide;
   }
 
   ::selection {

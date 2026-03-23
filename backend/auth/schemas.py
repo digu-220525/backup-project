@@ -8,6 +8,8 @@ class UserBase(BaseModel):
     role: str
     bio: Optional[str] = None
     skills: Optional[str] = None
+    profile_picture: Optional[str] = None
+    hourly_rate: Optional[float] = None
 
 class UserCreate(UserBase):
     password: str
@@ -17,6 +19,8 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     bio: Optional[str] = None
     skills: Optional[str] = None
+    profile_picture: Optional[str] = None
+    hourly_rate: Optional[float] = None
     current_password: Optional[str] = None
 
 class PasswordVerify(BaseModel):
@@ -48,3 +52,9 @@ class Token(BaseModel):
 
 # Final Refinement bug fix
 User = UserOut
+
+class UserStats(BaseModel):
+    projects_done: int
+    proposals_given: int
+    jobs_posted: int
+    jobs_done: int

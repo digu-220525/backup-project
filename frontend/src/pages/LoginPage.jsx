@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Home, ArrowLeft } from 'lucide-react';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -71,6 +71,34 @@ const LoginPage = () => {
         onError={e => { e.target.src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=95&auto=format&fit=crop'; }}
       />
 
+      {/* ── Back to Homepage button — fixed top-left ── */}
+      <Link
+        to="/"
+        style={{
+          position: 'fixed', top: 20, left: 24, zIndex: 50,
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '9px 16px',
+          borderRadius: 12,
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          color: 'rgba(255,255,255,0.65)',
+          fontSize: 13, fontWeight: 700,
+          textDecoration: 'none',
+          letterSpacing: '0.01em',
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateX(0)' : 'translateX(-12px)',
+          transition: 'opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s, background 0.2s, color 0.2s',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.11)'; e.currentTarget.style.color = '#fff'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
+      >
+        <ArrowLeft size={14} style={{ flexShrink: 0 }} />
+        <span>Back to Home</span>
+      </Link>
+
       {/* Gradient overlays */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(6,9,26,0.70) 0%,rgba(13,17,48,0.55) 50%,rgba(6,9,26,0.68) 100%)' }} />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 50%,rgba(99,102,241,0.12) 0%,transparent 65%)' }} />
@@ -82,13 +110,21 @@ const LoginPage = () => {
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8"
           style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease 0.1s' }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#6366f1,#4f46e5)', boxShadow: '0 4px 14px rgba(99,102,241,0.40)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+          {/* Nexlance SVG icon */}
+          <div className="relative flex items-center justify-center w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%', position: 'relative', zIndex: 1 }}>
+              <path d="M9 22.5L9 9C9 7.34315 10.3431 6 12 6C13.6569 6 15 7.34315 15 9V17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17L21 9C21 8.44772 21.4477 8 22 8V8C22.5523 8 23 8.44772 23 9L23 17C23 19.7614 20.7614 22 18 22C15.2386 22 13 19.7614 13 17V9.5C13 8.67157 12.3284 8 11.5 8C10.6716 8 10 8.67157 10 9.5V23C10 23.5523 9.55228 24 9 24V24C8.44772 24 8 23.5523 8 23L8 22.5C8 21.6716 8.67157 21 9.5 21C10.3284 21 11 21.6716 11 22.5V22.5" fill="url(#loginNexGrad)" />
+              <defs>
+                <linearGradient id="loginNexGrad" x1="8" y1="6" x2="23" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#22d3ee" />
+                  <stop offset="0.5" stopColor="#3b82f6" />
+                  <stop offset="1" stopColor="#9333ea" />
+                </linearGradient>
+              </defs>
             </svg>
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#22d3ee,#3b82f6,#9333ea)', opacity: 0.35, filter: 'blur(8px)' }} />
           </div>
-          <span className="text-white font-black text-lg tracking-tight" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>VantagePoint</span>
+          <span className="text-white font-black text-lg tracking-tight">Nexlance</span>
         </div>
 
         {/* Glass form card */}
@@ -106,7 +142,7 @@ const LoginPage = () => {
             <div className="text-center mb-7"
               style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'none' : 'translateY(8px)', transition: 'all 0.5s ease 0.15s' }}>
               <h1 className="text-2xl font-black text-white mb-1.5"
-                style={{ fontFamily: "'Space Grotesk',sans-serif", letterSpacing: '-0.02em' }}>
+                style={{  letterSpacing: '-0.02em' }}>
                 Welcome back 👋
               </h1>
               <p className="text-white/40 text-sm">Sign in to your account to continue</p>

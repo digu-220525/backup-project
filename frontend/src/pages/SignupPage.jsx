@@ -202,12 +202,20 @@ const SignupPage = () => {
 
           {/* ── Logo above card ── */}
           <div style={{ ...stagger(1), display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '22px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background .5s ease, box-shadow .5s ease', background: A.pillOn, boxShadow: A.pillShd }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%', position: 'relative', zIndex: 1 }}>
+                <path d="M9 22.5L9 9C9 7.34315 10.3431 6 12 6C13.6569 6 15 7.34315 15 9V17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17L21 9C21 8.44772 21.4477 8 22 8V8C22.5523 8 23 8.44772 23 9L23 17C23 19.7614 20.7614 22 18 22C15.2386 22 13 19.7614 13 17V9.5C13 8.67157 12.3284 8 11.5 8C10.6716 8 10 8.67157 10 9.5V23C10 23.5523 9.55228 24 9 24V24C8.44772 24 8 23.5523 8 23L8 22.5C8 21.6716 8.67157 21 9.5 21C10.3284 21 11 21.6716 11 22.5V22.5" fill="url(#signupNexGrad)" />
+                <defs>
+                  <linearGradient id="signupNexGrad" x1="8" y1="6" x2="23" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#22d3ee" />
+                    <stop offset="0.5" stopColor="#3b82f6" />
+                    <stop offset="1" stopColor="#9333ea" />
+                  </linearGradient>
+                </defs>
               </svg>
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#22d3ee,#3b82f6,#9333ea)', opacity: 0.35, filter: 'blur(8px)' }} />
             </div>
-            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 900, fontSize: '18px', color: '#fff', letterSpacing: '-.02em' }}>VantagePoint</span>
+            <span style={{ fontWeight: 900, fontSize: '18px', color: '#fff', letterSpacing: '-.02em' }}>Nexlance</span>
           </div>
 
           {/* ── Glass card ── */}
@@ -223,7 +231,7 @@ const SignupPage = () => {
 
               {/* Heading */}
               <div style={{ ...stagger(2), textAlign: 'center', marginBottom: '28px' }}>
-                <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 900, fontSize: '26px', color: '#fff', letterSpacing: '-.03em', marginBottom: '6px', transition: 'all .3s ease' }}>
+                <h1 style={{  fontWeight: 900, fontSize: '26px', color: '#fff', letterSpacing: '-.03em', marginBottom: '6px', transition: 'all .3s ease' }}>
                   {isFL ? 'Start freelancing 🚀' : 'Hire top talent 🎯'}
                 </h1>
                 <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '14px', fontWeight: 500 }}>
