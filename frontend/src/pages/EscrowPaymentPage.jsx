@@ -146,7 +146,7 @@ const EscrowPaymentPage = () => {
                 <div className="px-6 pt-6 pb-5 border-b border-white/[0.06]">
                   <div className="flex items-center gap-2.5">
                     <ShieldCheck size={15} className="text-indigo-400" />
-                    <p className="text-sm font-bold text-white">Deposit via Stripe Secure</p>
+                    <p className="text-sm font-bold text-white">Secure Escrow Deposit</p>
                   </div>
                   <p className="text-xs text-white/30 font-medium mt-1">
                     Your money is held securely in Escrow until you approve the final work.
@@ -214,7 +214,7 @@ const EscrowPaymentPage = () => {
 
               <div className="space-y-3 mb-5">
                 {[
-                  { label: 'Escrow Amount', value: `$${budget.toFixed(2)}` },
+                  { label: 'Accepted Bid', value: `$${budget.toFixed(2)}` },
                   { label: 'Platform fee', value: 'Free', highlight: 'text-indigo-400' },
                 ].map(row => (
                   <div key={row.label} className="flex items-center justify-between gap-4">
@@ -227,7 +227,7 @@ const EscrowPaymentPage = () => {
               </div>
 
               <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
-                <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Total</span>
+                <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Amount to Pay</span>
                 <span className="text-2xl font-black text-white">${budget.toFixed(2)}</span>
               </div>
             </div>

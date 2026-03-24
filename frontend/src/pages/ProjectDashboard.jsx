@@ -84,9 +84,15 @@ const ProjectDashboard = () => {
 
   const fetchProject = async () => {
     try {
-      const res = await api.get('/projects');
-      const found = res.data.find(p => p.project_id === parseInt(id));
-      if (found) setProject(found);
+      // Admin can fetch any project by ID directly; others fetch their own list
+      if (user?.role === 'admin') {
+        const res = await api.get(`/projects/${id}`);
+        setProject(res.data);
+      } else {
+        const res = await api.get('/projects');
+        const found = res.data.find(p => p.project_id === parseInt(id));
+        if (found) setProject(found);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -230,13 +236,13 @@ const ProjectDashboard = () => {
             <InfoCard
               icon={User}
               label="Client"
-              value={isClient ? 'You' : `User #${project.client_id}`}
+              value={isClient ? 'You' : (project.client_name || `User #${project.client_id}`)}
               accent="bg-blue-500/15 border border-blue-500/20 text-blue-400"
             />
             <InfoCard
               icon={Users}
               label="Freelancer"
-              value={isFreelancer ? 'You' : `User #${project.freelancer_id}`}
+              value={isFreelancer ? 'You' : (project.freelancer_name || `User #${project.freelancer_id}`)}
               accent="bg-emerald-500/15 border border-emerald-500/20 text-emerald-400"
             />
             <InfoCard
@@ -330,12 +336,16 @@ const ProjectDashboard = () => {
 
             {/* In dispute */}
             {isInDispute && (
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-red-500/25 bg-red-500/10 text-red-400">
-                <Flag size={13} />
-                Dispute Under Review
+              <div className="flex flex-col gap-1 px-4 py-3 rounded-xl border border-red-500/30 bg-red-500/10 w-full mt-2">
+                <div className="flex items-center gap-2 text-sm font-black text-red-400">
+                  <Flag size={14} />
+                  Under Dispute
+                </div>
+                <p className="text-xs font-bold text-red-300">
+                  This job is currently under dispute. Admin is reviewing the case.
+                </p>
               </div>
-            )}
-          </div>
+            )}          </div>
         </div>
 
         {/* ── TIMELINE CARD ── */}

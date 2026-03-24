@@ -34,3 +34,11 @@ async def mark_all_read(
 ):
     await service.mark_all_as_read(db=db, user_id=current_user.user_id)
     return {"message": "All notifications marked as read"}
+
+@router.delete("/clear-all", status_code=204)
+async def clear_all_notifications(
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    await service.delete_all_notifications(db=db, user_id=current_user.user_id)
+    return None

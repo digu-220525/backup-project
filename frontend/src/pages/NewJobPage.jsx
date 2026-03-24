@@ -64,10 +64,47 @@ const NewJobPage = () => {
     experience_level: 'any',
     skills: '',
   });
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [skillInput, setSkillInput] = useState('');
   const [errors, setErrors]   = useState({});
   const [loading, setLoading] = useState(false);
   const [step, setStep]       = useState(1);
   const [success, setSuccess] = useState(false);
+
+  const SUGGESTED_SKILLS = [
+    // Frontend
+    'React', 'Next.js', 'Vue.js', 'Angular', 'JavaScript', 'TypeScript', 'HTML/CSS', 'Tailwind CSS',
+    // Backend
+    'Node.js', 'Python', 'PHP', 'Java', 'Django', 'MongoDB', 'PostgreSQL', 'MySQL',
+    // Mobile & DevOps
+    'Flutter', 'React Native', 'Android', 'iOS', 'AWS', 'Docker', 'Git',
+    // Design & Tools
+    'Figma', 'UI/UX Design', 'Graphic Design', 'WordPress',
+    // Non-tech
+    'SEO', 'Copywriting', 'Content Writing', 'Social Media', 'Video Editing',
+  ];
+
+  const addSkill = (skill) => {
+    const trimmed = skill.trim();
+    if (!trimmed || selectedSkills.includes(trimmed)) return;
+    const updated = [...selectedSkills, trimmed];
+    setSelectedSkills(updated);
+    setFormData(prev => ({ ...prev, skills: updated.join(', ') }));
+  };
+
+  const removeSkill = (skill) => {
+    const updated = selectedSkills.filter(s => s !== skill);
+    setSelectedSkills(updated);
+    setFormData(prev => ({ ...prev, skills: updated.join(', ') }));
+  };
+
+  const handleSkillKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addSkill(skillInput);
+      setSkillInput('');
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -244,7 +281,7 @@ const NewJobPage = () => {
                             onClick={() => setFormData({ ...formData, category: cat })}
                             style={{
                               padding:'10px 8px', borderRadius:10, fontSize:12, fontWeight:600,
-                              textAlign:'center', cursor:'pointer', border:'none', transition:'all .2s',
+                              textAlign:'center', cursor:'pointer', transition:'all .2s',
                               background: formData.category === cat ? 'rgba(99,102,241,0.18)' : 'rgba(255,255,255,0.04)',
                               border: formData.category === cat ? '1px solid rgba(99,102,241,0.52)' : '1px solid rgba(255,255,255,0.08)',
                               color: formData.category === cat ? '#a5b4fc' : 'rgba(255,255,255,0.48)',
@@ -281,16 +318,58 @@ const NewJobPage = () => {
                     {/* Skills */}
                     <div style={{ marginBottom:8 }}>
                       <label style={LABEL}>Required Skills <span style={{ color:'rgba(255,255,255,0.26)', fontWeight:400, textTransform:'none', letterSpacing:0 }}>(optional)</span></label>
-                      <div style={{ position:'relative' }}>
+
+                      {/* Selected skill tags */}
+                      {selectedSkills.length > 0 && (
+                        <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:10 }}>
+                          {selectedSkills.map(skill => (
+                            <span key={skill} style={{
+                              display:'inline-flex', alignItems:'center', gap:5,
+                              padding:'5px 10px', borderRadius:20,
+                              background:'rgba(99,102,241,0.15)', border:'1px solid rgba(99,102,241,0.35)',
+                              color:'#a5b4fc', fontSize:12, fontWeight:600,
+                            }}>
+                              {skill}
+                              <button type="button" onClick={() => removeSkill(skill)} style={{
+                                background:'none', border:'none', cursor:'pointer',
+                                color:'rgba(165,180,252,0.6)', padding:0, lineHeight:1,
+                                fontSize:14, display:'flex', alignItems:'center',
+                              }}>×</button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Type and add custom skill */}
+                      <div style={{ position:'relative', marginBottom:10 }}>
                         <Tag size={14} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'rgba(255,255,255,0.20)', pointerEvents:'none' }}/>
                         <input
-                          name="skills"
-                          value={formData.skills}
-                          onChange={handleChange}
-                          placeholder="e.g. React, Node.js, Tailwind, PostgreSQL"
+                          value={skillInput}
+                          onChange={e => setSkillInput(e.target.value)}
+                          onKeyDown={handleSkillKeyDown}
+                          placeholder='Type a skill and press Enter to add…'
                           style={{ ...iBase, padding:'13px 16px 13px 42px' }}
-                          onFocus={focusIn} onBlur={focusOut}
+                          onFocus={focusIn} onBlur={e => { focusOut(e); if(skillInput.trim()) { addSkill(skillInput); setSkillInput(''); } }}
                         />
+                      </div>
+
+                      {/* Suggested chips */}
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                        {SUGGESTED_SKILLS.filter(s => !selectedSkills.includes(s)).map(skill => (
+                          <button key={skill} type="button"
+                            onClick={() => addSkill(skill)}
+                            style={{
+                              padding:'5px 11px', borderRadius:20, fontSize:11, fontWeight:600,
+                              cursor:'pointer', transition:'all .18s',
+                              background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.09)',
+                              color:'rgba(255,255,255,0.45)',
+                            }}
+                            onMouseOver={e => { e.currentTarget.style.background='rgba(99,102,241,0.12)'; e.currentTarget.style.borderColor='rgba(99,102,241,0.35)'; e.currentTarget.style.color='#a5b4fc'; }}
+                            onMouseOut={e => { e.currentTarget.style.background='rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.09)'; e.currentTarget.style.color='rgba(255,255,255,0.45)'; }}
+                          >
+                            + {skill}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -369,7 +448,7 @@ const NewJobPage = () => {
                             onClick={() => setFormData({ ...formData, experience_level: lvl.value })}
                             style={{
                               padding:'14px 10px', borderRadius:12, textAlign:'center', cursor:'pointer',
-                              border:'none', transition:'all .2s',
+                              transition:'all .2s',
                               background: formData.experience_level === lvl.value ? 'rgba(99,102,241,0.16)' : 'rgba(255,255,255,0.04)',
                               border: formData.experience_level === lvl.value ? '1px solid rgba(99,102,241,0.50)' : '1px solid rgba(255,255,255,0.08)',
                             }}>

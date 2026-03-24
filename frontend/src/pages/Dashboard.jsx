@@ -61,25 +61,49 @@ const Pill = ({ status }) => {
 };
 
 /* ─── Stat Card ─── */
-const StatCard = ({ icon, label, value, sub, delay = 0 }) => (
-  <div 
-    className="bg-white/[0.02] backdrop-blur-xl rounded-[24px] p-6 relative overflow-hidden group hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-300 border border-white/[0.08]"
-    style={{ animation: `fadeUp .5s ease ${delay}s both` }}
-  >
-    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[40px] rounded-full group-hover:bg-indigo-500/20 transition-all duration-500 pointer-events-none -mr-16 -mt-16" />
-    
-    <div className="flex justify-between items-start mb-4 relative z-10">
-      <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 group-hover:bg-white/10 transition-colors shadow-inner">
-        {React.cloneElement(icon, { size: 20 })}
+const CARD_COLORS = [
+  { glow: 'rgba(99,102,241,0.18)',  bg: 'rgba(99,102,241,0.08)',  border: 'rgba(99,102,241,0.2)',  icon: '#818cf8', gradient: 'from-indigo-500/[0.07] to-purple-500/[0.03]' },
+  { glow: 'rgba(236,72,153,0.16)',  bg: 'rgba(236,72,153,0.08)',  border: 'rgba(236,72,153,0.2)',  icon: '#f472b6', gradient: 'from-pink-500/[0.07] to-rose-500/[0.03]' },
+  { glow: 'rgba(59,130,246,0.16)',  bg: 'rgba(59,130,246,0.08)',  border: 'rgba(59,130,246,0.2)',  icon: '#60a5fa', gradient: 'from-blue-500/[0.07] to-cyan-500/[0.03]' },
+  { glow: 'rgba(16,185,129,0.16)',  bg: 'rgba(16,185,129,0.08)',  border: 'rgba(16,185,129,0.2)',  icon: '#34d399', gradient: 'from-emerald-500/[0.07] to-teal-500/[0.03]' },
+];
+
+const StatCard = ({ icon, label, value, sub, delay = 0, colorIdx = 0 }) => {
+  const c = CARD_COLORS[colorIdx % CARD_COLORS.length];
+  return (
+    <div
+      className={`bg-gradient-to-br ${c.gradient} backdrop-blur-xl rounded-2xl p-6 relative overflow-hidden group transition-all duration-300 cursor-default`}
+      style={{
+        animation: `fadeUp .5s ease ${delay}s both`,
+        border: `1px solid ${c.border}`,
+        boxShadow: `0 0 0 1px ${c.border}44, 0 16px 40px rgba(0,0,0,0.35)`,
+      }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 0 1px ${c.border}, 0 20px 50px rgba(0,0,0,0.45), 0 0 40px ${c.glow}`; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = `0 0 0 1px ${c.border}44, 0 16px 40px rgba(0,0,0,0.35)`; e.currentTarget.style.transform = 'translateY(0)'; }}
+    >
+      {/* ambient blob */}
+      <div style={{ position:'absolute', top:-20, right:-20, width:80, height:80, borderRadius:'50%', background:c.glow, filter:'blur(30px)', pointerEvents:'none', transition:'opacity .3s' }}/>
+
+      <div className="flex justify-between items-start mb-4 relative z-10">
+        <div style={{
+          width:44, height:44, borderRadius:13, background:c.bg,
+          border:`1px solid ${c.border}`, display:'flex', alignItems:'center', justifyContent:'center',
+          color:c.icon, boxShadow:`0 0 14px ${c.glow}`,
+          transition:'transform .25s ease',
+        }}
+          className="group-hover:scale-110"
+        >
+          {React.cloneElement(icon, { size: 19 })}
+        </div>
+        <TrendingUp size={14} style={{ color: c.icon, opacity:0.5 }} />
       </div>
-      <TrendingUp size={16} className="text-slate-500" />
+
+      <p className="text-3xl font-bold text-white tracking-tight mb-1 relative z-10">{value}</p>
+      <p className="text-sm font-semibold text-slate-400 relative z-10">{label}</p>
+      {sub && <p className="text-[12px] font-semibold mt-2 relative z-10" style={{ color: c.icon }}>{sub}</p>}
     </div>
-    
-    <p className="text-3xl font-bold text-white tracking-tight mb-1 relative z-10">{value}</p>
-    <p className="text-sm font-semibold text-slate-400 relative z-10">{label}</p>
-    {sub && <p className="text-[13px] font-medium text-indigo-400 mt-2 relative z-10">{sub}</p>}
-  </div>
-);
+  );
+};
 
 /* ─── ProjectRow ─── */
 const ProjectRow = ({ project, userRole }) => {
@@ -316,12 +340,20 @@ const Dashboard = () => {
             
             <div className="flex shrink-0">
               {isFL ? (
-                <Link to="/jobs" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold transition-all hover:bg-indigo-500 hover:shadow-[0_8px_20px_rgba(79,70,229,0.3)]">
-                  <Search size={18} /> Find Work
+                <Link to="/jobs" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-white text-sm font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ background:'linear-gradient(135deg,#3b82f6,#6366f1)', boxShadow:'0 4px 18px rgba(59,130,246,0.35)' }}
+                  onMouseEnter={e=>e.currentTarget.style.boxShadow='0 8px 28px rgba(59,130,246,0.5)'}
+                  onMouseLeave={e=>e.currentTarget.style.boxShadow='0 4px 18px rgba(59,130,246,0.35)'}
+                >
+                  <Search size={17} /> Find Work
                 </Link>
               ) : (
-                <Link to="/jobs/new" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-white font-semibold text-sm transition-all hover:shadow-[0_8px_20px_rgba(79,70,229,0.3)]" style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
-                  <Plus size={18} /> Post a Job
+                <Link to="/jobs/new" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-white font-bold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ background:'linear-gradient(135deg,#6366f1,#ec4899)', boxShadow:'0 4px 18px rgba(99,102,241,0.38)' }}
+                  onMouseEnter={e=>e.currentTarget.style.boxShadow='0 8px 28px rgba(99,102,241,0.55)'}
+                  onMouseLeave={e=>e.currentTarget.style.boxShadow='0 4px 18px rgba(99,102,241,0.38)'}
+                >
+                  <Plus size={17} /> Post a Job
                 </Link>
               )}
             </div>
@@ -331,13 +363,13 @@ const Dashboard = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
             {loading ? (
               [...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white/[0.02] border border-white/5 rounded-[24px] p-6 h-[140px] flex flex-col justify-between">
-                  <Skeleton w={48} h={48} r={16} />
+                <div key={i} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 h-[140px] flex flex-col justify-between">
+                  <Skeleton w={48} h={48} r={13} />
                   <Skeleton w="60%" h={24} r={6} />
                 </div>
               ))
             ) : (
-              STATS.map((s, i) => <StatCard key={i} {...s} delay={0.05 * i} />)
+              STATS.map((s, i) => <StatCard key={i} {...s} delay={0.05 * i} colorIdx={i} />)
             )}
           </div>
 
@@ -430,7 +462,7 @@ const Dashboard = () => {
                   {loading ? (
                     <div className="space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} h={80} r={16} />)}</div>
                   ) : (() => {
-                    const jobsWithAnyBids = visibleJobs.filter(j => jobBids[j.job_id]?.length > 0);
+                    const jobsWithAnyBids = visibleJobs.filter(j => (j.bid_count || 0) > 0);
                     return jobsWithAnyBids.length === 0 ? (
                       <EmptyState icon={<Bell />} title="No proposals received yet"
                         sub="Post jobs and wait for freelancers to submit proposals."
@@ -518,8 +550,8 @@ const Dashboard = () => {
 
                   {/* Total Earnings Hero Card */}
                   {(() => {
-                    const released = transactions.filter(t => t.status === 'released');
-                    const pending  = transactions.filter(t => t.status === 'pending' || t.status === 'held');
+                    const released = transactions.filter(t => t.status.toLowerCase() === 'released');
+                    const pending  = transactions.filter(t => ['pending', 'held', 'locked'].includes(t.status.toLowerCase()));
                     const totalReleased = released.reduce((s, t) => s + Number(t.amount), 0);
                     const totalPending  = pending.reduce((s, t) => s + Number(t.amount), 0);
                     return (
@@ -570,8 +602,8 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         {transactions.map((tx) => {
                           const txProject = projects.find(p => p.project_id === tx.project_id);
-                          const isReleased = tx.status === 'released';
-                          const isPending  = tx.status === 'pending' || tx.status === 'held';
+                          const isReleased = tx.status.toLowerCase() === 'released';
+                          const isPending  = ['pending', 'held', 'locked'].includes(tx.status.toLowerCase());
                           return (
                             <div key={tx.transaction_id}
                               className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.06] transition-all"

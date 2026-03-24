@@ -34,3 +34,9 @@ async def mark_all_as_read(db: AsyncSession, user_id: int):
         n.is_read = True
     await db.commit()
     return True
+
+async def delete_all_notifications(db: AsyncSession, user_id: int):
+    from sqlalchemy import delete
+    await db.execute(delete(Notification).where(Notification.user_id == user_id))
+    await db.commit()
+    return True

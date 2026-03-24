@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
-  const { notifications, unreadCount, markAsRead, markAllRead } = useContext(NotificationContext);
+  const { notifications, unreadCount, markAsRead, markAllRead, clearAll } = useContext(NotificationContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,7 +69,7 @@ const Navbar = () => {
             </div>
             <span className="text-white font-black text-xl tracking-tight leading-none pt-0.5">Nexlance</span>
           </Link>
-          
+
           {/* Center Nav — absolutely centred */}
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1">
             {user?.role === 'freelancer' && (
@@ -127,8 +127,8 @@ const Navbar = () => {
                           <span className="bg-blue-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">{unreadCount}</span>
                         )}
                       </div>
-                      {unreadCount > 0 && (
-                        <button onClick={markAllRead} className="text-[8px] font-black text-blue-400/60 uppercase tracking-widest hover:text-blue-300 transition-colors">
+                      {notifications.length > 0 && (
+                        <button onClick={clearAll} className="text-[8px] font-black text-red-400/60 uppercase tracking-widest hover:text-red-300 transition-colors">
                           Clear all
                         </button>
                       )}

@@ -22,6 +22,7 @@ import FreelancersPage from './pages/FreelancersPage';
 import SavedJobsPage from './pages/SavedJobsPage';
 import MessagesPage from './pages/MessagesPage';
 import InboxPage from './pages/InboxPage';
+import AdminDisputesPage from './pages/AdminDisputesPage';
 
 const ProtectedRoute = ({ children }) => {
  const { user, loading } = useContext(AuthContext);
@@ -68,6 +69,7 @@ const App = () => {
          <Route path="/projects/:id/payment" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
          <Route path="/messages/:id" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
          <Route path="/messages" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
+         <Route path="/admin/disputes" element={<ProtectedRoute><AdminDisputesPage /></ProtectedRoute>} />
 
          {/* Fallback */}
          <Route path="*" element={<Navigate to="/" replace />} />

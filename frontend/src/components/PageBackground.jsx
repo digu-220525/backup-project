@@ -18,29 +18,27 @@ const PageBackground = ({ variant = 'light' }) => {
           filter: isDark
             ? 'brightness(0.25) saturate(0.8)'
             : isAuth
-            ? 'brightness(0.75) contrast(1.05) saturate(0.9)'
-            : 'brightness(1.05) saturate(1.05)',
+              ? 'brightness(0.75) contrast(1.05) saturate(0.9)'
+              : 'brightness(1.05) saturate(1.05)',
         }}
       ></div>
 
       {/* Dark overlay */}
       <div
-        className={`absolute inset-0 ${
-          isDark
+        className={`absolute inset-0 ${isDark
             ? 'bg-slate-950/55'
             : isAuth
-            ? 'bg-slate-900/50'
-            : 'bg-white/25'
-        } backdrop-blur-[3px]`}
+              ? 'bg-slate-900/50'
+              : 'bg-white/25'
+          } backdrop-blur-[3px]`}
       ></div>
 
       {/* Gradient depth */}
       <div
-        className={`absolute inset-0 ${
-          isDark || isAuth
+        className={`absolute inset-0 ${isDark || isAuth
             ? 'bg-gradient-to-tr from-slate-950 via-slate-950/40 to-slate-900/30'
             : 'bg-gradient-to-tr from-white/10 via-transparent to-blue-50/10'
-        }`}
+          }`}
       ></div>
 
       {/* Subtle vignette for dark variant */}

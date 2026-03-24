@@ -22,6 +22,8 @@ class ProjectOut(ProjectBase):
     created_at: datetime
     job_title: Optional[str] = None
     job_budget: Optional[float] = None
+    client_name: Optional[str] = None
+    freelancer_name: Optional[str] = None
 
     class Config:
         from_attributes = True

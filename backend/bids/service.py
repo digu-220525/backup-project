@@ -85,6 +85,7 @@ async def accept_bid(db: AsyncSession, bid_id: int, client_id: int):
         b.status = 'accepted' if b.bid_id == bid_id else 'rejected'
         
     job.status = 'pending_escrow'
+    job.budget = bid.bid_amount  # Override original job budget with accepted bid
     
     await db.commit()
     await db.refresh(bid)

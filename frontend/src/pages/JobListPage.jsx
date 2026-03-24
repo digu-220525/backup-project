@@ -61,7 +61,7 @@ const JobCard = ({ job, isSaved, onToggleSave, user }) => {
 
   return (
     <div className="group relative overflow-hidden bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-xl rounded-[24px] border border-white/[0.08] hover:border-white/[0.15] p-8 transition-all duration-300 flex flex-col h-full shadow-lg">
-      
+
       {/* Subtle Hover Glow */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[50px] rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
@@ -76,13 +76,12 @@ const JobCard = ({ job, isSaved, onToggleSave, user }) => {
             {job.status === 'in_progress' ? 'Active' : job.status === 'open' ? 'Open' : job.status}
           </span>
           {user?.role === 'freelancer' && (
-            <button 
+            <button
               onClick={(e) => { e.preventDefault(); onToggleSave(job.job_id); }}
-              className={`p-1.5 rounded-full transition-all duration-300 border ${
-                isSaved 
-                  ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' 
+              className={`p-1.5 rounded-full transition-all duration-300 border ${isSaved
+                  ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
                   : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               <Bookmark size={15} className={isSaved ? "fill-current" : ""} />
             </button>
@@ -164,13 +163,13 @@ const JobListPage = () => {
     try {
       const [jobsRes, savedRes] = await Promise.all([
         api.get('/jobs?status=open'),
-        user?.role === 'freelancer' ? api.get('/jobs/saved').catch(()=>({data:[]})) : Promise.resolve({data:[]})
+        user?.role === 'freelancer' ? api.get('/jobs/saved').catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
-      
+
       if (user?.role === 'freelancer') {
         setSavedJobs(new Set(savedRes.data.map(j => j.job_id)));
       }
-      
+
       let data = jobsRes.data;
 
       if (filters.q) {
@@ -242,7 +241,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 input[type=number] { -moz-appearance: textfield; }
 `}</style>
       <PageBackground variant="dark" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* Header */}
@@ -259,11 +258,10 @@ input[type=number] { -moz-appearance: textfield; }
         <div className="flex flex-col sm:flex-row gap-4 mb-10">
           <button
             onClick={() => setFilterOpen(!filterOpen)}
-            className={`flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
-              hasActiveFilters
+            className={`flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border text-sm font-semibold transition-all duration-300 flex-shrink-0 ${hasActiveFilters
                 ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)]'
                 : 'bg-white/[0.04] backdrop-blur-xl border-white/[0.08] text-slate-300 hover:bg-white/[0.08] hover:border-white/[0.15]'
-            }`}
+              }`}
           >
             <SlidersHorizontal className="w-5 h-5" />
             Filters
@@ -322,11 +320,10 @@ input[type=number] { -moz-appearance: textfield; }
                       <button
                         key={cat}
                         onClick={() => updateFilter('category', cat)}
-                        className={`text-[10px] px-3.5 py-2 rounded-xl border transition-all font-bold tracking-tight ${
-                          filters.category === cat
+                        className={`text-[10px] px-3.5 py-2 rounded-xl border transition-all font-bold tracking-tight ${filters.category === cat
                             ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
                             : 'bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white'
-                        }`}
+                          }`}
                       >
                         {cat}
                       </button>
@@ -367,11 +364,10 @@ input[type=number] { -moz-appearance: textfield; }
                       <button
                         key={lvl}
                         onClick={() => updateFilter('experience', lvl)}
-                        className={`text-center text-[10px] px-3 py-2 rounded-xl border transition-all font-black uppercase tracking-wider ${
-                          filters.experience === lvl
+                        className={`text-center text-[10px] px-3 py-2 rounded-xl border transition-all font-black uppercase tracking-wider ${filters.experience === lvl
                             ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
                             : 'bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white'
-                        }`}
+                          }`}
                       >
                         {lvl.replace(' Level', '')}
                       </button>
@@ -417,9 +413,9 @@ input[type=number] { -moz-appearance: textfield; }
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {jobs.map(job => (
-                  <JobCard 
-                    key={job.job_id} 
-                    job={job} 
+                  <JobCard
+                    key={job.job_id}
+                    job={job}
                     user={user}
                     isSaved={savedJobs.has(job.job_id)}
                     onToggleSave={toggleSave}

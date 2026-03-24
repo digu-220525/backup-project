@@ -52,6 +52,11 @@ async def get_projects(db: AsyncSession, user_id: int):
     result = await db.execute(query)
     projects = result.scalars().all()
     for p in projects:
+        from auth.models import User
+        client_res = await db.execute(select(User.name).where(User.user_id == p.client_id))
+        p.client_name = client_res.scalar()
+        freelancer_res = await db.execute(select(User.name).where(User.user_id == p.freelancer_id))
+        p.freelancer_name = freelancer_res.scalar()
         if p.job:
             setattr(p, 'job_title', p.job.title)
             setattr(p, 'job_budget', p.job.budget)
@@ -60,9 +65,16 @@ async def get_projects(db: AsyncSession, user_id: int):
 async def get_project(db: AsyncSession, project_id: int):
     result = await db.execute(select(Project).where(Project.project_id == project_id).options(joinedload(Project.job)))
     project = result.scalars().first()
-    if project and project.job:
-        setattr(project, 'job_title', project.job.title)
-        setattr(project, 'job_budget', project.job.budget)
+    if project:
+        # Get names for the frontend
+        from auth.models import User
+        client_res = await db.execute(select(User.name).where(User.user_id == project.client_id))
+        project.client_name = client_res.scalar()
+        freelancer_res = await db.execute(select(User.name).where(User.user_id == project.freelancer_id))
+        project.freelancer_name = freelancer_res.scalar()
+        if project.job:
+            setattr(project, 'job_title', project.job.title)
+            setattr(project, 'job_budget', project.job.budget)
     return project
 
 async def submit_work(db: AsyncSession, project_id: int, submission: WorkSubmission, freelancer_id: int):
@@ -106,6 +118,18 @@ async def approve_work(db: AsyncSession, project_id: int, client_id: int):
     job = await get_job(db, project.job_id)
     if job:
         job.status = 'completed'
+
+    # Escrow Release Logic
+    from payments.models import Transaction
+    escrow_q = select(Transaction).where(
+        Transaction.project_id == project_id,
+        Transaction.status == 'LOCKED'
+    )
+    escrow_res = await db.execute(escrow_q)
+    transaction = escrow_res.scalars().first()
+    if transaction:
+        transaction.status = 'RELEASED'
+
         
     await db.commit()
     await db.refresh(project)

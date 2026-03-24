@@ -61,7 +61,7 @@ const FreelancerCard = ({ freelancer }) => {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <h3 className="text-xl font-black text-white group-hover:text-blue-300 transition-colors uppercase tracking-tight leading-none mb-2 truncate"
-                style={{  }}>
+                style={{}}>
                 {freelancer.name}
               </h3>
               {freelancer.location && (
@@ -224,7 +224,7 @@ const FreelancersPage = () => {
             <span className="text-blue-400/50 font-black uppercase tracking-[0.4em] text-[9px]">Talent Network</span>
           </div>
           <h1 className="text-5xl sm:text-6xl font-black text-white mb-4 tracking-tight uppercase leading-none"
-            style={{  letterSpacing: '-0.04em' }}>
+            style={{ letterSpacing: '-0.04em' }}>
             Find Talent
           </h1>
           <p className="text-white/25 font-bold text-sm uppercase tracking-[0.3em]">
@@ -236,11 +236,10 @@ const FreelancersPage = () => {
         <div className="flex flex-col sm:flex-row gap-3 mb-10">
           <button
             onClick={() => setFilterOpen(!filterOpen)}
-            className={`flex items-center gap-3 px-7 py-4 rounded-2xl border text-[10px] uppercase font-black tracking-[0.18em] transition-all duration-400 flex-shrink-0 ${
-              hasFilters
+            className={`flex items-center gap-3 px-7 py-4 rounded-2xl border text-[10px] uppercase font-black tracking-[0.18em] transition-all duration-400 flex-shrink-0 ${hasFilters
                 ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
                 : 'bg-white/[0.04] backdrop-blur-2xl border-white/[0.07] text-white/40 hover:bg-white/[0.06] hover:border-white/[0.12] hover:text-white'
-            }`}
+              }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
             Filters
@@ -304,11 +303,10 @@ const FreelancersPage = () => {
                       <button
                         key={skill}
                         onClick={() => updateFilter('skill', skill)}
-                        className={`text-[9px] px-3 py-1.5 rounded-lg transition-all font-black uppercase tracking-widest border ${
-                          filters.skill === skill
+                        className={`text-[9px] px-3 py-1.5 rounded-lg transition-all font-black uppercase tracking-widest border ${filters.skill === skill
                             ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
                             : 'bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white'
-                        }`}
+                          }`}
                       >
                         {skill}
                       </button>
@@ -343,11 +341,10 @@ const FreelancersPage = () => {
                       <button
                         key={level}
                         onClick={() => updateFilter('experience', level)}
-                        className={`w-full text-left text-[10px] px-4 py-2.5 rounded-xl transition-all font-bold uppercase tracking-widest ${
-                          filters.experience === level
+                        className={`w-full text-left text-[10px] px-4 py-2.5 rounded-xl transition-all font-bold uppercase tracking-widest ${filters.experience === level
                             ? 'bg-blue-600/[0.12] text-blue-300 border border-blue-500/[0.2]'
                             : 'text-white/30 border border-transparent hover:bg-white/[0.04] hover:text-white'
-                        }`}
+                          }`}
                       >
                         {level}
                       </button>
@@ -376,7 +373,7 @@ const FreelancersPage = () => {
                   <Users className="w-7 h-7 text-white/[0.1]" />
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-3"
-                  style={{  }}>No freelancers found</h3>
+                  style={{}}>No freelancers found</h3>
                 <p className="text-white/20 text-[10px] font-bold uppercase tracking-widest mb-8 max-w-xs mx-auto leading-relaxed">
                   Try adjusting your search filters.
                 </p>

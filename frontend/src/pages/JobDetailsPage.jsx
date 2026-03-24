@@ -193,18 +193,32 @@ const JobDetailsPage = () => {
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none -mr-40 -mt-40"></div>
           
           <div className="relative z-10">
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold ${
-                job.status === 'open' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                job.status === 'in_progress' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                'bg-white/5 text-slate-300 border-white/10'
-              }`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${job.status === 'open' ? 'bg-emerald-400 animate-pulse' : 'bg-current'}`}></div>
-                {job.status === 'in_progress' ? 'Active' : job.status === 'open' ? 'Open' : job.status}
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold ${
+                  job.status === 'open' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                  job.status === 'in_progress' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                  job.status === 'in_dispute' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                  'bg-white/5 text-slate-300 border-white/10'
+                }`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${job.status === 'open' ? 'bg-emerald-400 animate-pulse' : 'bg-current'}`}></div>
+                  {job.status === 'in_progress' ? 'Active' : job.status === 'open' ? 'Open' : job.status === 'in_dispute' ? 'Under Dispute' : job.status}
+                </div>
+                <div className="text-xs font-medium text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                  Job ID: {job.job_id}
+                </div>
               </div>
-              <div className="text-xs font-medium text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                Job ID: {job.job_id}
-              </div>
+              
+              {job.status === 'in_dispute' && (
+                <div className="w-full sm:max-w-md p-3 rounded-xl border border-red-500/30 bg-red-500/10 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-sm font-black text-red-400">
+                    <AlertTriangle size={14} /> Under Dispute
+                  </div>
+                  <p className="text-xs font-bold text-red-300">
+                    This job is currently under dispute. Admin is reviewing the case.
+                  </p>
+                </div>
+              )}
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-bold text-white leading-tight tracking-tight mb-6">

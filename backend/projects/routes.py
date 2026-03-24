@@ -26,6 +26,20 @@ async def list_my_projects(
 ):
     return await service.get_projects(db=db, user_id=current_user.user_id)
 
+@router.get("/{project_id}", response_model=schemas.ProjectOut)
+async def get_project_by_id(
+    project_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    project = await service.get_project(db=db, project_id=project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    # Allow admin, the client, or the freelancer to view
+    if current_user.role != 'admin' and project.client_id != current_user.user_id and project.freelancer_id != current_user.user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return project
+
 @router.post("/{project_id}/submit-work", response_model=schemas.ProjectOut)
 async def submit_work(
     project_id: int,

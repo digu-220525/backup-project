@@ -26,8 +26,11 @@ class Dispute(Base):
     raised_by_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     reason = Column(String, nullable=False)
     description = Column(Text, nullable=False)
-    status = Column(String, default="open") # open, resolved_refund, resolved_pay
+    status = Column(String, default="open") # open, resolved
     created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Note: For actual chat/messages and submitted files, we can just say they use the existing project/job mechanisms,
-    # or we can store JSON in description/files. Let's just keep it simple with reasoning and description.
+    
+    # Decision Execution Logging
+    admin_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
+    admin_decision = Column(String, nullable=True) # RELEASE, REFUND
+    admin_notes = Column(Text, nullable=True)
+    resolved_at = Column(DateTime, nullable=True)

@@ -83,6 +83,12 @@ async def create_payment_intent(db: AsyncSession, project_id: int, client_id: in
 
     amount_in_cents = int(job.budget * 100)
 
+    # If no real Stripe key is configured, return a simulated intent for dev/demo
+    DUMMY_KEYS = {"sk_test_dummy_key", "sk_test_*****_key", "", None}
+    if not settings.STRIPE_SECRET_KEY or settings.STRIPE_SECRET_KEY in DUMMY_KEYS or "dummy" in settings.STRIPE_SECRET_KEY:
+        simulated_secret = f"pi_simulated_{project_id}_{client_id}_secret_demo"
+        return {"client_secret": simulated_secret}
+
     try:
         intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
