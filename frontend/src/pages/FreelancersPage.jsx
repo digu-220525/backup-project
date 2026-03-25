@@ -40,12 +40,24 @@ const FreelancerCard = ({ freelancer }) => {
     ? freelancer.skills.split(',').map(s => s.trim()).filter(Boolean)
     : [];
 
-  return (
-    <div className="group relative overflow-hidden bg-slate-950/50 backdrop-blur-2xl rounded-[2.5rem] border border-white/[0.06] p-9 hover:bg-slate-900/50 transition-all duration-500 flex flex-col h-full"
-      style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.03), 0 16px 48px rgba(0,0,0,0.4)' }}>
+  const CHIP_COLORS = [
+    'bg-blue-500/10 border-blue-500/20 text-blue-400',
+    'bg-purple-500/10 border-purple-500/20 text-purple-400',
+    'bg-pink-500/10 border-pink-500/20 text-pink-400',
+    'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+    'bg-amber-500/10 border-amber-500/20 text-amber-400',
+    'bg-cyan-500/10 border-cyan-500/20 text-cyan-400',
+  ];
 
-      {/* Hover glow */}
-      <div className="absolute top-0 right-0 w-44 h-44 bg-blue-500/[0.05] blur-[70px] rounded-full -mr-22 -mt-22 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+  return (
+    <div className="group relative overflow-hidden bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-xl rounded-[24px] border border-white/[0.08] hover:border-blue-500/25 p-9 transition-all duration-300 flex flex-col h-full shadow-lg"
+      style={{ '--hover-shadow': '0 0 40px rgba(59,130,246,0.1)' }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = '0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.18), 0 0 40px rgba(59,130,246,0.07)'}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = ''}
+    >
+
+      {/* Multi-colour hover glow */}
+      <div className="absolute top-0 right-0 w-44 h-44 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -mr-22 -mt-22" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, rgba(139,92,246,0.08) 60%, transparent 100%)', filter: 'blur(40px)', borderRadius: '50%' }} />
 
       <div className="flex items-start gap-6 mb-7 relative z-10">
         {/* Avatar */}
@@ -60,8 +72,7 @@ const FreelancerCard = ({ freelancer }) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-black text-white group-hover:text-blue-300 transition-colors uppercase tracking-tight leading-none mb-2 truncate"
-                style={{}}>
+              <h3 className="text-xl font-black text-white group-hover:text-blue-300 transition-colors uppercase tracking-tight leading-none mb-2 truncate">
                 {freelancer.name}
               </h3>
               {freelancer.location && (
@@ -88,8 +99,8 @@ const FreelancerCard = ({ freelancer }) => {
                 ))}
               </div>
               <span className="text-sm font-black text-white/80">{freelancer.rating?.toFixed(1)}</span>
-              {freelancer.jobs && (
-                <span className="text-[9px] font-black text-white/15 uppercase tracking-widest bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/[0.04]">{freelancer.jobs} jobs</span>
+              {freelancer.projects_done > 0 && (
+                <span className="text-[9px] font-black text-white/15 uppercase tracking-widest bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/[0.04]">{freelancer.projects_done} jobs</span>
               )}
             </div>
           )}
@@ -106,8 +117,8 @@ const FreelancerCard = ({ freelancer }) => {
       {/* Skills */}
       {skills.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-7 relative z-10">
-          {skills.slice(0, 4).map(skill => (
-            <span key={skill} className="px-3.5 py-1.5 bg-blue-500/[0.08] border border-blue-500/[0.14] text-blue-400/80 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-blue-500/[0.15] transition-colors cursor-default">
+          {skills.slice(0, 4).map((skill, i) => (
+            <span key={skill} className={`px-3 py-1 text-[12px] font-semibold border rounded-xl transition-all cursor-default hover:scale-105 ${CHIP_COLORS[i % CHIP_COLORS.length]}`}>
               {skill}
             </span>
           ))}
@@ -118,17 +129,20 @@ const FreelancerCard = ({ freelancer }) => {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-6 border-t border-white/[0.05] relative z-10">
+      <div className="flex items-center justify-between pt-6 border-t border-white/[0.05] relative z-10 mt-auto">
         <div className="flex items-center gap-2 text-[9px] text-emerald-400/70 font-black uppercase tracking-[0.25em]">
           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
           Available
         </div>
         <Link
           to={`/profile/${freelancer.user_id}`}
-          className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.07] text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 hover:border-blue-500 transition-all duration-300 group/btn"
+          className="flex items-center gap-2 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 group/btn hover:scale-[1.03] active:scale-[0.97]"
+          style={{ background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', boxShadow: '0 4px 14px rgba(59,130,246,0.32)' }}
+          onMouseEnter={e => e.currentTarget.style.boxShadow = '0 6px 22px rgba(59,130,246,0.5)'}
+          onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 14px rgba(59,130,246,0.32)'}
         >
           View Profile
-          <ArrowUpRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+          <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
         </Link>
       </div>
     </div>

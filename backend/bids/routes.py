@@ -54,3 +54,13 @@ async def mark_bids_read(
 ):
     await service.mark_bids_as_read(db=db, job_id=job_id)
     return None
+
+@router.delete("/{bid_id}", status_code=200)
+async def withdraw_bid(
+    bid_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    if current_user.role != 'freelancer':
+        raise HTTPException(status_code=403, detail="Only freelancers can withdraw proposals.")
+    return await service.withdraw_bid(db=db, bid_id=bid_id, freelancer_id=current_user.user_id)

@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from config import settings
 from database import create_tables
@@ -21,6 +22,8 @@ from reviews.routes import router as reviews_router
 from notifications.routes import router as notifications_router
 from support.routes import router as support_router
 from messages.routes import router as messages_router
+from change_requests.routes import router as change_requests_router
+from uploads_router import router as upload_router
 
 
 # ── Lifespan: runs once at startup/shutdown ───────────────────────────────────
@@ -50,16 +53,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static_uploads", StaticFiles(directory="uploads"), name="static_uploads")
+
 # ── Register routers ──────────────────────────────────────────────────────────
-app.include_router(auth_router,     prefix="/auth",     tags=["Authentication"])
-app.include_router(jobs_router,     prefix="/jobs",     tags=["Jobs"])
-app.include_router(bids_router,     prefix="/bids",     tags=["Bids"])
-app.include_router(projects_router, prefix="/projects", tags=["Projects"])
-app.include_router(payments_router, prefix="/payments", tags=["Payments"])
-app.include_router(reviews_router,  prefix="/reviews",  tags=["Reviews"])
-app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
-app.include_router(support_router, prefix="/support", tags=["Support"])
-app.include_router(messages_router, prefix="/messages", tags=["Messages"])
+app.include_router(auth_router,           prefix="/auth",           tags=["Authentication"])
+app.include_router(jobs_router,           prefix="/jobs",           tags=["Jobs"])
+app.include_router(bids_router,           prefix="/bids",           tags=["Bids"])
+app.include_router(projects_router,       prefix="/projects",       tags=["Projects"])
+app.include_router(payments_router,       prefix="/payments",       tags=["Payments"])
+app.include_router(reviews_router,        prefix="/reviews",        tags=["Reviews"])
+app.include_router(upload_router,         prefix="/uploads",        tags=["Uploads"])
+app.include_router(notifications_router,  prefix="/notifications",  tags=["Notifications"])
+app.include_router(support_router,        prefix="/support",        tags=["Support"])
+app.include_router(messages_router,       prefix="/messages",       tags=["Messages"])
+app.include_router(change_requests_router, prefix="/change-requests", tags=["Change Requests"])
 
 
 # ── Health check ─────────────────────────────────────────────────────────────

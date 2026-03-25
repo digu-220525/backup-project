@@ -11,6 +11,7 @@ const SubmitWorkPage = () => {
   const { id } = useParams();
   const [project, setProject]     = useState(null);
   const [workNotes, setWorkNotes] = useState('');
+  const [files, setFiles]         = useState([]);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
   const navigate = useNavigate();
@@ -26,17 +27,40 @@ const SubmitWorkPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!workNotes.trim()) { setError('Please describe your completed work before submitting.'); return; }
+    if (!workNotes.trim() && files.length === 0) { 
+        setError('Please provide a description or upload files before submitting.'); 
+        return; 
+    }
     setLoading(true);
     setError('');
+    
+    let uploadedFiles = [];
     try {
-      await api.post(`/projects/${id}/submit-work`, { work_notes: workNotes });
+      if (files.length > 0) {
+        const formData = new FormData();
+        files.forEach(f => formData.append('files', f));
+        const upRes = await api.post('/uploads/multiple', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploadedFiles = upRes.data;
+      }
+      
+      await api.post(`/projects/${id}/submit-work`, { 
+          work_notes: workNotes,
+          submitted_files: uploadedFiles
+      });
       navigate(`/projects/${id}`);
     } catch (err) {
       setError(err.response?.data?.detail || 'Unable to submit work. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileChange = (e) => {
+     if (e.target.files) {
+         setFiles(Array.from(e.target.files));
+     }
   };
 
   if (!project) return (
@@ -132,8 +156,34 @@ const SubmitWorkPage = () => {
                 onBlur={e => { e.target.style.border = '1px solid rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
               />
 
+              {/* File Upload UI */}
+              <div className="mt-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-white mb-2">
+                    <Upload size={14} className="text-indigo-400" />
+                    Attach Files (Optional)
+                  </label>
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 hover:border-indigo-500/30 bg-white/[0.02] hover:bg-indigo-500/5 rounded-2xl cursor-pointer transition-all group">
+                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload size={24} className="text-white/30 group-hover:text-indigo-400 mb-2 transition-colors" />
+                        <p className="text-sm text-white/50 font-medium">Click to select or drag and drop files here</p>
+                        <p className="text-xs text-white/30 mt-1">PDF, JPG, PNG, DOCX, ZIP (Max 20MB)</p>
+                     </div>
+                     <input type="file" multiple className="hidden" onChange={handleFileChange} />
+                  </label>
+                  {files.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                          {files.map((file, i) => (
+                              <div key={i} className="flex justify-between items-center px-4 py-2 bg-white/5 rounded-xl border border-white/10 text-sm font-medium text-white/70">
+                                  <span className="truncate">{file.name}</span>
+                                  <span className="text-xs text-white/40">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                              </div>
+                          ))}
+                      </div>
+                  )}
+              </div>
+
               {/* Progress bar */}
-              <div className="mt-2 h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="mt-4 h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 rounded-full transition-all duration-300"
                   style={{ width: `${Math.min(100, (charCount / 200) * 100)}%` }}

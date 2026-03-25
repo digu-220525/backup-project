@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 
 class ProjectBase(BaseModel):
@@ -10,6 +10,7 @@ class ProjectCreate(ProjectBase):
 
 class WorkSubmission(BaseModel):
     work_notes: str
+    submitted_files: Optional[List[Dict[str, Any]]] = []
 
 class ProjectOut(ProjectBase):
     project_id: int
@@ -24,6 +25,7 @@ class ProjectOut(ProjectBase):
     job_budget: Optional[float] = None
     client_name: Optional[str] = None
     freelancer_name: Optional[str] = None
+    submitted_files: Optional[List[Dict[str, Any]]] = []
 
     class Config:
         from_attributes = True

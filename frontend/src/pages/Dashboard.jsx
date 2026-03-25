@@ -655,11 +655,6 @@ const Dashboard = () => {
 
             {/* Sidebar Column */}
             <div className="lg:col-span-4 flex flex-col gap-6">
-              
-
-
-
-
             </div>
           </div>
 

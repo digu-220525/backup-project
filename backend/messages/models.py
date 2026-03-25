@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, Boolean, String
+from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, Boolean, String, JSON
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -10,6 +10,7 @@ class Message(Base):
     project_id = Column(Integer, ForeignKey("projects.project_id", ondelete="CASCADE"), nullable=False, index=True)
     sender_id  = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     content    = Column(Text, nullable=False)
+    attachments = Column(JSON, nullable=True, server_default='[]')
     is_read    = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

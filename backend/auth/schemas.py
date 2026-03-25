@@ -37,6 +37,10 @@ class GoogleLogin(BaseModel):
 class UserOut(UserBase):
     user_id: int
     created_at: datetime
+    projects_done: Optional[int] = 0
+    proposals_given: Optional[int] = 0
+    jobs_posted: Optional[int] = 0
+    jobs_done: Optional[int] = 0
 
     class Config:
         from_attributes = True

@@ -17,7 +17,16 @@ async def create_bid(db: AsyncSession, bid: BidCreate, freelancer_id: int):
         raise HTTPException(status_code=404, detail="Job not found")
     if job.status != 'open':
         raise HTTPException(status_code=400, detail="Job is not open for bidding")
-        
+
+    # Enforce proposal limit
+    current_count = getattr(job, 'bid_count', 0)
+    max_allowed = getattr(job, 'max_proposals', 40)
+    if current_count >= max_allowed:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Proposal limit reached ({max_allowed}/{max_allowed}). No more applications accepted."
+        )
+
     db_bid = Bid(
         job_id=bid.job_id,
         freelancer_id=freelancer_id,
@@ -25,19 +34,19 @@ async def create_bid(db: AsyncSession, bid: BidCreate, freelancer_id: int):
         bid_amount=bid.bid_amount
     )
     db.add(db_bid)
-    
+
     try:
         await db.commit()
         await db.refresh(db_bid)
-        
+
         # Notify the client
         await create_notification(db, NotificationCreate(
             user_id=job.client_id,
             title="New Bid Received",
             message=f"You have a new bid on your job: {job.title}",
-            link=f"/jobs/{job.job_id}" # Or wherever is appropriate
+            link=f"/jobs/{job.job_id}"
         ))
-        
+
         return db_bid
     except IntegrityError:
         await db.rollback()
@@ -67,7 +76,7 @@ async def accept_bid(db: AsyncSession, bid_id: int, client_id: int):
     # Get the bid and its associated job
     bid = await get_bid(db, bid_id)
     if not bid:
-        raise HTTPException(status_code=404, detail="Bid not found")
+        raise HTTPException(status_code=404, detail="This proposal was recently withdrawn by the freelancer and is no longer available.")
         
     job = await get_job(db, bid.job_id)
     if not job:
@@ -109,3 +118,16 @@ async def accept_bid(db: AsyncSession, bid_id: int, client_id: int):
             ))
 
     return bid
+
+async def withdraw_bid(db: AsyncSession, bid_id: int, freelancer_id: int):
+    """Allow a freelancer to retract their pending proposal."""
+    bid = await get_bid(db, bid_id)
+    if not bid:
+        raise HTTPException(status_code=404, detail="Bid not found")
+    if bid.freelancer_id != freelancer_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    if bid.status != 'pending':
+        raise HTTPException(status_code=400, detail="Only pending proposals can be withdrawn")
+    await db.delete(bid)
+    await db.commit()
+    return {"status": "withdrawn"}

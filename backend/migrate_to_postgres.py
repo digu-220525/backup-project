@@ -16,6 +16,7 @@ from reviews.models import Review
 from notifications.models import Notification
 from support.models import SupportTicket, Dispute
 from messages.models import Message
+from change_requests.models import ChangeRequest
 
 async def migrate():
     print("Nexlance Protocol: Database Migration Initialized...")

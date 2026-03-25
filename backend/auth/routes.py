@@ -24,6 +24,7 @@ async def register(user: schemas.UserCreate, db: AsyncSession = Depends(get_db))
 @router.post("/login", response_model=schemas.Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     user = await service.get_user_by_email(db, email=form_data.username)
+    
     if not user or not service.verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,6 +36,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.post("/google-login", response_model=schemas.Token)
 async def google_login(login_data: schemas.GoogleLogin, db: AsyncSession = Depends(get_db)):

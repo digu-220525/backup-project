@@ -88,6 +88,7 @@ async def submit_work(db: AsyncSession, project_id: int, submission: WorkSubmiss
         
     project.status = 'work_submitted'
     project.work_notes = submission.work_notes
+    project.submitted_files = submission.submitted_files
     project.submitted_at = datetime.utcnow()
     await db.commit()
     await db.refresh(project)

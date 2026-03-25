@@ -22,11 +22,11 @@ from database import get_db
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password[:72], hashed_password)
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def get_password_hash(password: str):
+    return pwd_context.hash(password[:72])
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -61,6 +61,10 @@ async def get_users(db: AsyncSession, role: Optional[str] = None):
             # Finished projects for freelancers
             count_res = await db.execute(select(func.count(Project.project_id)).where(Project.freelancer_id == u.user_id, Project.status == 'completed'))
             u.projects_done = count_res.scalar() or 0
+            
+            # Proposals given
+            bid_res = await db.execute(select(func.count(Bid.bid_id)).where(Bid.freelancer_id == u.user_id))
+            u.proposals_given = bid_res.scalar() or 0
         else:
             # Posted jobs for clients
             count_res = await db.execute(select(func.count(Job.job_id)).where(Job.client_id == u.user_id, Job.status != 'deleted'))

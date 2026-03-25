@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from sqlalchemy import Integer, Text, String, Date, DateTime, func, ForeignKey
+from sqlalchemy import Integer, Text, String, Date, DateTime, func, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -16,6 +16,7 @@ class Project(Base):
     start_date: Mapped[date] = mapped_column(Date, server_default=func.current_date())
     end_date: Mapped[date] = mapped_column(Date, nullable=True)
     submitted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    submitted_files: Mapped[list] = mapped_column(JSON, nullable=True, server_default='[]')
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     job = relationship("Job")

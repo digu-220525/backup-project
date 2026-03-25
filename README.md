@@ -33,9 +33,10 @@ freelance-marketplace-platform/
 │   ├── auth/                  # Advanced Identity & Access Management
 │   ├── jobs/                  # Job Lifecycle & Discovery
 │   ├── bids/                  # Competitive Proposal System
-│   ├── projects/              # Active Workflow & Delivery Management
-│   ├── messages/              # Direct User-to-User Messaging
+│   ├── projects/              # Active Workflow & Delivery Management (Multi-file Support)
+│   ├── messages/              # Direct User-to-User Messaging (With Attachments)
 │   ├── payments/              # Simulated Escrow & Security System
+│   ├── uploads/               # Secure File Storage & Ingestion
 │   ├── reviews/               # Reputation & Rating Module
 │   ├── notifications/         # Real-time User Alert System
 │   └── support/               # Complaints & Ticket Management
@@ -77,7 +78,7 @@ pip install -r requirements.txt
 cp ../.env.example .env
 
 # 4. Service Launch
-  uvicorn main:app --reload
+uvicorn main:app --reload
 # → API: http://localhost:8000
 # → Docs: http://localhost:8000/docs
 ```
@@ -152,6 +153,7 @@ Interactive documentation is available at **http://localhost:8000/docs**.
 | **Jobs** | GET | `/jobs` | Optimized Job Querying & Filtering |
 | **Bids** | POST | `/bids` | Proposal Submission for Freelancers |
 | **Projects**| PUT | `/projects/{id}/approve` | Client-Side Project Finalization |
+| **Uploads** | POST | `/uploads/multiple` | Secure Multi-file Asset Ingestion |
 | **Payments**| GET | `/payments/history` | Financial Transaction Logs |
 | **Support** | POST | `/support/tickets` | Conflict Resolution & Complaints |
 | **Alerts**  | GET | `/notifications` | Personalized User Alert Stream |

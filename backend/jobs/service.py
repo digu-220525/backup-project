@@ -15,7 +15,8 @@ async def create_job(db: AsyncSession, job: JobCreate, client_id: int):
         budget=job.budget,
         deadline=job.deadline,
         category=job.category,
-        experience_level=job.experience_level
+        experience_level=job.experience_level,
+        max_proposals=job.max_proposals,
     )
     db.add(db_job)
     await db.commit()

@@ -18,6 +18,7 @@ class Job(Base):
     experience_level: Mapped[str] = mapped_column(String(20), server_default="any", nullable=False)
     status: Mapped[str] = mapped_column(String(20), server_default="open", nullable=False)
     is_hidden_by_client: Mapped[bool] = mapped_column(Boolean, server_default="false", nullable=False)
+    max_proposals: Mapped[int] = mapped_column(Integer, server_default="40", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 class SavedJob(Base):

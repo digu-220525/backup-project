@@ -24,8 +24,9 @@ const LoginPage = () => {
           setError('');
           setLoading(true);
           try {
-            await googleLogin(response.credential);
-            navigate('/dashboard');
+            const u = await googleLogin(response.credential);
+            if (u && u.role === 'admin') navigate('/admin/disputes');
+            else navigate('/dashboard');
           } catch (err) {
             setError('Google authentication failed. Please try again.');
           } finally {
@@ -52,8 +53,13 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError(''); setLoading(true);
-    try { await login(email, password); navigate('/dashboard'); }
+    try { 
+        const u = await login(email, password); 
+        if (u && u.role === 'admin') navigate('/admin/disputes');
+        else navigate('/dashboard'); 
+    }
     catch (err) {
+      console.error("Login failed:", err);
       const d = err.response?.data?.detail;
       setError(typeof d === 'string' ? d : Array.isArray(d) ? d[0].msg : 'Invalid email or password.');
     } finally { setLoading(false); }

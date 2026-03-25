@@ -100,6 +100,7 @@ const SignupPage = () => {
       setSubmitSuccess(true);
       setTimeout(() => navigate('/dashboard'), 800);
     } catch (err) {
+      console.error("Registration failed:", err);
       const d = err.response?.data?.detail;
       setErrors({ general: typeof d === 'string' ? d : Array.isArray(d) ? d[0].msg : 'Error creating account. Try again.' });
     } finally { setLoading(false); }

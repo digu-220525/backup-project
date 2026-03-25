@@ -39,6 +39,7 @@ async def get_messages(db: AsyncSession, project_id: int, user_id: int):
             "content":    m.content,
             "is_read":    m.is_read,
             "created_at": m.created_at,
+            "attachments": m.attachments,
             "sender_name": sender_name,
         })
     return out
@@ -57,6 +58,7 @@ async def send_message(db: AsyncSession, project_id: int, sender_id: int, data: 
         project_id=project_id,
         sender_id=sender_id,
         content=data.content.strip(),
+        attachments=data.attachments,
     )
     db.add(msg)
     await db.commit()
@@ -89,6 +91,7 @@ async def send_message(db: AsyncSession, project_id: int, sender_id: int, data: 
         "content":    msg.content,
         "is_read":    msg.is_read,
         "created_at": msg.created_at,
+        "attachments": msg.attachments,
         "sender_name": sender_name,
     }
 
@@ -132,6 +135,7 @@ async def get_user_messages(db: AsyncSession, current_user_id: int, other_user_i
             "content":    m.content,
             "is_read":    m.is_read,
             "created_at": m.created_at,
+            "attachments": m.attachments,
             "sender_name": sender_name,
         })
     return out

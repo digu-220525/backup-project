@@ -9,6 +9,7 @@ class JobBase(BaseModel):
     deadline: date
     category: Optional[str] = None
     experience_level: str = "any"
+    max_proposals: int = 40
 
 class JobCreate(JobBase):
     pass
@@ -18,12 +19,14 @@ class JobUpdate(BaseModel):
     is_hidden_by_client: Optional[bool] = None
     category: Optional[str] = None
     experience_level: Optional[str] = None
+    max_proposals: Optional[int] = None
 
 class JobOut(JobBase):
     job_id: int
     client_id: int
     status: str
     is_hidden_by_client: bool
+    max_proposals: int
     created_at: datetime
     bid_count: int = 0
     unread_bid_count: int = 0

@@ -4,7 +4,7 @@ import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import {
   ArrowLeft, Send, MessageSquare, Lock, CheckCheck, Check,
-  User, Briefcase, AlertTriangle
+  User, Briefcase, AlertTriangle, Paperclip, X, File as FileIcon
 } from 'lucide-react';
 
 /* ── tiny helpers ── */
@@ -53,6 +53,19 @@ const Bubble = ({ msg, isMine }) => (
       }`}>
         {msg.content}
       </div>
+      {msg.attachments && msg.attachments.length > 0 && (
+          <div className={`mt-1 flex flex-col gap-1 w-full ${isMine ? 'items-end' : 'items-start'}`}>
+              {msg.attachments.map((file, i) => (
+                  <a key={i} href={api.defaults.baseURL + file.url} target="_blank" rel="noopener noreferrer" className={`flex flex-col gap-0.5 px-3 py-2 rounded-xl text-xs font-semibold max-w-[200px] hover:opacity-80 transition-opacity ${isMine ? 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20' : 'bg-white/[0.04] text-white/70 border border-white/[0.06]'}`}>
+                     <span className="flex items-center gap-1.5 truncate">
+                        <FileIcon size={12} className="flex-shrink-0" />
+                        <span className="truncate">{file.filename}</span>
+                     </span>
+                     <span className="text-[10px] opacity-60">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                  </a>
+              ))}
+          </div>
+      )}
       <div className={`flex items-center gap-1.5 px-1 ${isMine ? 'flex-row-reverse' : ''}`}>
         <span className="text-[10px] text-white/20 font-medium">{fmt(msg.created_at)}</span>
         {isMine && (
@@ -73,6 +86,7 @@ const MessagesPage = () => {
   const [otherUser, setOtherUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText]         = useState('');
+  const [files, setFiles]       = useState([]);
   const [loading, setLoading]   = useState(true);
   const [sending, setSending]   = useState(false);
   const [error, setError]       = useState('');
@@ -124,13 +138,28 @@ const MessagesPage = () => {
   const handleSend = async (e) => {
     e?.preventDefault();
     const content = text.trim();
-    if (!content || sending) return;
+    if ((!content && files.length === 0) || sending) return;
 
     setSending(true);
     setText('');
+    
+    let uploadedFiles = [];
     try {
-      const res = await api.post(`/messages/user/${id}`, { content });
+      if (files.length > 0) {
+        const formData = new FormData();
+        files.forEach(f => formData.append('files', f));
+        const upRes = await api.post('/uploads/multiple', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploadedFiles = upRes.data;
+      }
+
+      const res = await api.post(`/messages/user/${id}`, { 
+          content: content || 'Sent an attachment',
+          attachments: uploadedFiles 
+      });
       setMessages(prev => [...prev, res.data]);
+      setFiles([]);
     } catch (err) {
       setError('Failed to send message.');
       setText(content); // restore
@@ -138,6 +167,16 @@ const MessagesPage = () => {
       setSending(false);
       inputRef.current?.focus();
     }
+  };
+
+  const handleFileChange = (e) => {
+     if (e.target.files) {
+         setFiles(prev => [...prev, ...Array.from(e.target.files)]);
+     }
+  };
+  
+  const removeFile = (index) => {
+     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleKeyDown = (e) => {
@@ -250,34 +289,53 @@ const MessagesPage = () => {
         className="flex-shrink-0 border-t border-white/[0.07] px-4 sm:px-8 py-4"
         style={{ background: 'rgba(7,14,28,0.97)', backdropFilter: 'blur(20px)' }}
       >
-        <form onSubmit={handleSend} className="max-w-2xl mx-auto flex items-end gap-3">
-          <textarea
-            ref={inputRef}
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message… (Enter to send)"
-            rows={1}
-            className="flex-1 px-4 py-3 bg-white/[0.05] border border-white/[0.09] rounded-2xl text-white text-sm font-medium placeholder-white/20 focus:outline-none focus:border-indigo-500/40 resize-none transition-colors leading-relaxed"
-            style={{ maxHeight: '120px', overflowY: 'auto' }}
-          />
-          <button
-            type="submit"
-            disabled={!text.trim() || sending}
-            className="w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-30"
-            style={text.trim() && !sending ? {
-              background: 'linear-gradient(135deg,#6366f1,#4f46e5)',
-              boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
-            } : {
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            {sending
-              ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              : <Send size={14} className={text.trim() ? 'text-white' : 'text-white/30'} />
-            }
-          </button>
+        <form onSubmit={handleSend} className="max-w-2xl mx-auto flex flex-col gap-3">
+          {files.length > 0 && (
+             <div className="flex flex-wrap gap-2 pb-1">
+                 {files.map((file, i) => (
+                    <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-xs font-semibold text-indigo-300">
+                       <FileIcon size={12} className="opacity-70" />
+                       <span className="truncate max-w-[100px]">{file.name}</span>
+                       <button type="button" onClick={() => removeFile(i)} className="p-0.5 hover:bg-indigo-500/20 rounded-md transition-colors ml-1 text-indigo-400 hover:text-indigo-200">
+                           <X size={12} />
+                       </button>
+                    </div>
+                 ))}
+             </div>
+          )}
+          <div className="flex items-end gap-3">
+              <label className="w-10 h-10 flex-shrink-0 rounded-xl bg-white/[0.05] border border-white/[0.09] flex items-center justify-center text-white/40 hover:text-indigo-400 hover:border-indigo-500/40 cursor-pointer transition-all">
+                  <Paperclip size={16} />
+                  <input type="file" multiple className="hidden" onChange={handleFileChange} />
+              </label>
+              <textarea
+                ref={inputRef}
+                value={text}
+                onChange={e => setText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message… (Enter to send)"
+                rows={1}
+                className="flex-1 px-4 py-3 bg-white/[0.05] border border-white/[0.09] rounded-2xl text-white text-sm font-medium placeholder-white/20 focus:outline-none focus:border-indigo-500/40 resize-none transition-colors leading-relaxed"
+                style={{ maxHeight: '120px', overflowY: 'auto' }}
+              />
+              <button
+                type="submit"
+                disabled={(!text.trim() && files.length === 0) || sending}
+                className="w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-30"
+                style={((text.trim() || files.length > 0) && !sending) ? {
+                  background: 'linear-gradient(135deg,#6366f1,#4f46e5)',
+                  boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
+                } : {
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                {sending
+                  ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <Send size={14} className={(text.trim() || files.length > 0) ? 'text-white' : 'text-white/30'} />
+                }
+              </button>
+          </div>
         </form>
         <p className="text-center text-[10px] text-white/15 font-medium mt-2 max-w-2xl mx-auto">
           Messages are only visible to the client and freelancer on this project

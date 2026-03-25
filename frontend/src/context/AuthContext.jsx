@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get('/auth/profile');
       setUser(response.data);
+      return response.data;
     } catch (error) {
       console.error('Failed to fetch profile', error);
       localStorage.removeItem('token');
@@ -37,7 +38,7 @@ export const AuthProvider = ({ children }) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
     localStorage.setItem('token', response.data.access_token);
-    await fetchUserProfile();
+    return await fetchUserProfile();
   };
 
   const register = async (userData) => {
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   const googleLogin = async (token, role = 'client') => {
     const response = await api.post('/auth/google-login', { token, role });
     localStorage.setItem('token', response.data.access_token);
-    await fetchUserProfile();
+    return await fetchUserProfile();
   };
 
   return (

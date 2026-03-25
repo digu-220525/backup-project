@@ -17,3 +17,5 @@ google-auth==2.49.1
 google-auth-oauthlib
 google-auth-httplib2
 python-jose
+openapi-schema-pydantic
+bcrypt<4.0.0aiofiles==23.2.1
