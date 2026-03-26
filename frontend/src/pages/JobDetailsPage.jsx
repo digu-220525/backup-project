@@ -171,7 +171,7 @@ const JobDetailsPage = () => {
           api.post(`/bids/job/${id}/read-all`).catch(() => {});
         }
 
-        // Fetch projects to find the one associated with this job
+        // Fetch projects to find the one associated with this gig
         const projectsRes = await api.get('/projects').catch(() => ({ data: [] }));
         const jobProject = projectsRes.data.find(p => p.job_id === parseInt(id));
         if (jobProject) {
@@ -312,12 +312,12 @@ const JobDetailsPage = () => {
     </div>
   );
 
-  if (!job) return (
+  if (!gig) return (
     <div className="min-h-screen pt-24 relative flex items-center justify-center bg-[#070e1c]">
       <div className="text-center">
         <AlertTriangle className="w-12 h-12 text-white/30 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-slate-300">Job not found</h2>
-        <Link to="/jobs" className="text-indigo-400 hover:text-indigo-300 font-medium mt-2 inline-block">← Back to jobs</Link>
+        <h2 className="text-xl font-semibold text-slate-300">Gig not found</h2>
+        <Link to="/gigs" className="text-indigo-400 hover:text-indigo-300 font-medium mt-2 inline-block">← Back to gigs</Link>
       </div>
     </div>
   );
@@ -341,13 +341,13 @@ const JobDetailsPage = () => {
         
         {/* Breadcrumb */}
         <div className="mb-8">
-          <Link to="/jobs" className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors group">
+          <Link to="/gigs" className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors group">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Job Search
+            Back to Gig Search
           </Link>
         </div>
 
-        {/* Job Header Card */}
+        {/* Gig Header Card */}
         <div className="bg-white/[0.02] backdrop-blur-2xl rounded-[32px] border border-white/[0.08] shadow-2xl p-9 sm:p-14 mb-8 relative overflow-hidden group">
           {/* Subtle glow behind card content */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/[0.08] blur-[120px] rounded-full pointer-events-none -mr-40 -mt-40 transition-opacity duration-700 group-hover:opacity-100" />
@@ -365,7 +365,7 @@ const JobDetailsPage = () => {
                   {job.status === 'in_progress' ? 'Active' : job.status === 'open' ? 'Open Status' : job.status === 'in_dispute' ? 'Under Dispute' : job.status}
                 </div>
                 <div className="text-[10px] font-black text-white/30 bg-white/5 px-4 py-1.5 rounded-full border border-white/10 uppercase tracking-[0.2em]">
-                  Job Reference #{job.job_id}
+                  Gig Reference #{job.job_id}
                 </div>
               </div>
               
@@ -443,7 +443,7 @@ const JobDetailsPage = () => {
 
         {/* Description */}
         <div className="bg-white/[0.02] backdrop-blur-xl rounded-[32px] border border-white/[0.08] p-8 sm:p-12 mb-8 relative z-10">
-          <h2 className="text-lg font-bold text-white mb-6 tracking-tight">Job Description</h2>
+          <h2 className="text-lg font-bold text-white mb-6 tracking-tight">Gig Description</h2>
           <div className="prose prose-invert max-w-none">
             <p className="text-slate-300 text-[15px] leading-relaxed whitespace-pre-wrap font-medium">
               {job.description}
@@ -454,7 +454,7 @@ const JobDetailsPage = () => {
           {isFreelancer && job.status === 'open' && !hasBid && !limitReached && (
             <div className="mt-12 pt-10 border-t border-white/5 flex sm:justify-end">
               <Link
-                to={`/jobs/${job.job_id}/bid`}
+                to={`/gigs/${job.job_id}/bid`}
                 className="w-full sm:w-auto inline-flex justify-center items-center gap-3 text-white font-black uppercase tracking-[0.2em] px-10 py-4 rounded-[20px] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
                 style={{ background: 'linear-gradient(135deg,#6366f1,#ec4899)', boxShadow: '0 8px 30px rgba(99,102,241,0.3)', fontSize:'12px' }}
                 onMouseEnter={e => e.currentTarget.style.boxShadow = '0 12px 40px rgba(99,102,241,0.5)'}
@@ -474,7 +474,7 @@ const JobDetailsPage = () => {
                 <div>
                   <p className="text-red-300 text-sm font-bold">Proposal limit reached</p>
                   <p className="text-red-400/60 text-xs mt-0.5">
-                    This job has received the maximum of {maxProposals} proposals and is no longer accepting applications.
+                    This gig has received the maximum of {maxProposals} proposals and is no longer accepting applications.
                   </p>
                 </div>
               </div>

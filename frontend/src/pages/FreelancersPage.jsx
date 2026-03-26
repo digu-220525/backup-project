@@ -100,7 +100,7 @@ const FreelancerCard = ({ freelancer }) => {
               </div>
               <span className="text-sm font-black text-white/80">{freelancer.rating?.toFixed(1)}</span>
               {freelancer.projects_done > 0 && (
-                <span className="text-[9px] font-black text-white/15 uppercase tracking-widest bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/[0.04]">{freelancer.projects_done} jobs</span>
+                <span className="text-[9px] font-black text-white/15 uppercase tracking-widest bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/[0.04]">{freelancer.projects_done} gigs</span>
               )}
             </div>
           )}
@@ -216,7 +216,7 @@ const FreelancersPage = () => {
     if (filters.maxRate) data = data.filter(f => (f.hourly_rate || 999) <= Number(filters.maxRate));
 
     if (filters.sort === 'rating') data.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    else if (filters.sort === 'jobs') data.sort((a, b) => (b.projects_done || 0) - (a.projects_done || 0));
+    else if (filters.sort === 'gigs') data.sort((a, b) => (b.projects_done || 0) - (a.projects_done || 0));
     else if (filters.sort === 'rate_low') data.sort((a, b) => (a.hourly_rate || 0) - (b.hourly_rate || 0));
     else if (filters.sort === 'rate_high') data.sort((a, b) => (b.hourly_rate || 0) - (a.hourly_rate || 0));
 
@@ -283,7 +283,7 @@ const FreelancersPage = () => {
               className="appearance-none bg-white/[0.04] backdrop-blur-2xl border border-white/[0.07] text-[10px] font-black uppercase tracking-[0.18em] text-white/50 px-7 py-4 pr-12 rounded-2xl focus:outline-none focus:border-blue-500/40 cursor-pointer hover:bg-white/[0.06] transition-all"
             >
               <option value="rating" className="bg-slate-900 text-white">Top Rated</option>
-              <option value="jobs" className="bg-slate-900 text-white">Most Jobs</option>
+              <option value="gigs" className="bg-slate-900 text-white">Most Gigs</option>
               <option value="rate_low" className="bg-slate-900 text-white">Rate: Low</option>
               <option value="rate_high" className="bg-slate-900 text-white">Rate: High</option>
             </select>

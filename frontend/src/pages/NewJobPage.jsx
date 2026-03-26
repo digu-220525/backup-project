@@ -50,7 +50,7 @@ const ERR = ({ msg }) => msg ? (
 
 /* ── Step pills ── */
 const STEPS = [
-  { num: 1, label: 'Job Details' },
+  { num: 1, label: 'Gig Details' },
   { num: 2, label: 'Budget & Deadline' },
 ];
 
@@ -191,7 +191,7 @@ const NewJobPage = () => {
             <Briefcase size={26} color="#fff" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tighter leading-none mb-2 uppercase">Create Job</h1>
+            <h1 className="text-3xl font-black text-white tracking-tighter leading-none mb-2 uppercase">Create Gig</h1>
             <p className="text-white/40 text-[13px] font-bold uppercase tracking-[0.2em]">Build your dream team today</p>
           </div>
         </div>
@@ -228,7 +228,7 @@ const NewJobPage = () => {
               <div className="w-20 h-20 rounded-[28px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-8 shadow-2xl scale-110">
                 <CheckCircle size={40} className="text-emerald-400" />
               </div>
-              <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Job Launched!</h2>
+              <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Gig Launched!</h2>
               <p className="text-white/40 text-sm font-bold uppercase tracking-[0.2em]">Preparing your dashboard now…</p>
             </div>
           ) : (
@@ -247,7 +247,7 @@ const NewJobPage = () => {
                 <div style={{ animation: 'fadeUp .4s ease' }}>
                   {/* Title */}
                   <div style={{ marginBottom: 20 }}>
-                    <label style={LABEL}>Job Title <span style={{ color: '#f87171' }}>*</span></label>
+                    <label style={LABEL}>Gig Title <span style={{ color: '#f87171' }}>*</span></label>
                     <div style={{ position: 'relative' }}>
                       <FileText size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.20)', pointerEvents: 'none' }} />
                       <input
@@ -472,9 +472,9 @@ const NewJobPage = () => {
                     </p>
                   </div>
 
-                  {/* Job summary preview */}
+                  {/* Gig summary preview */}
                   <div style={{ padding: '16px 18px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 22 }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 10 }}>Job Summary</p>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 10 }}>Gig Summary</p>
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
                       <p style={{ color: '#fff', fontWeight: 600, fontSize: 14, margin: 0, flex: 1 }}>{formData.title || '—'}</p>
                       {formData.category && (
@@ -534,7 +534,7 @@ const NewJobPage = () => {
           <div style={{ marginTop: 18, padding: '13px 16px', borderRadius: 12, background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.15)', display: 'flex', alignItems: 'flex-start', gap: 11, animation: 'fadeUp .5s ease .2s both' }}>
             <Sparkles size={14} color="#60a5fa" style={{ flexShrink: 0, marginTop: 1 }} />
             <p style={{ color: 'rgba(96,165,250,0.78)', fontSize: 12, fontWeight: 500, margin: 0, lineHeight: 1.6 }}>
-              <strong style={{ color: '#60a5fa' }}>Pro tip:</strong> Jobs with detailed descriptions and a clear scope receive up to 3× more quality proposals. Include your tech stack, deliverables, and timeline expectations.
+              <strong style={{ color: '#60a5fa' }}>Pro tip:</strong> Gigs with detailed descriptions and a clear scope receive up to 3× more quality proposals. Include your tech stack, deliverables, and timeline expectations.
             </p>
           </div>
         )}

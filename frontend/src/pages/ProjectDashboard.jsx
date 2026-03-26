@@ -417,7 +417,7 @@ const ProjectDashboard = () => {
                 </div>
                 <p className="text-xs font-bold text-indigo-400/70 uppercase tracking-widest">Project #{project.project_id}</p>
               </div>
-              <h1 className="text-2xl font-black text-white tracking-tight">{project.job_title || `Job #${project.job_id}`}</h1>
+              <h1 className="text-2xl font-black text-white tracking-tight">{project.job_title || `Gig #${project.job_id}`}</h1>
               {project.job_budget && (
                 <p className="text-sm text-white/35 font-semibold mt-1 flex items-center gap-1.5">
                   <DollarSign size={13} />{Number(project.job_budget).toLocaleString()} contract value
@@ -530,7 +530,7 @@ const ProjectDashboard = () => {
             {isInDispute && (
               <div className="flex flex-col gap-1 px-4 py-3 rounded-xl border border-red-500/30 bg-red-500/10 w-full mt-2">
                 <div className="flex items-center gap-2 text-sm font-black text-red-400"><Flag size={14} /> Under Dispute</div>
-                <p className="text-xs font-bold text-red-300">This job is currently under dispute. Admin is reviewing the case.</p>
+                <p className="text-xs font-bold text-red-300">This gig is currently under dispute. Admin is reviewing the case.</p>
               </div>
             )}
           </div>

@@ -32,7 +32,7 @@ const CATEGORY_KEYWORDS = [
 ];
 
 /* ─── Recommendation Algorithm ───────────────────────────────────────────── */
-const computeJobScore = (job, freelancerSkills, freelancerRate, preferredCategory) => {
+const computeJobScore = (gig, freelancerSkills, freelancerRate, preferredCategory) => {
   const jobText = `${job.title || ''} ${job.description || ''} ${job.category || ''}`.toLowerCase();
   const matchedSkills = freelancerSkills.filter(sk => jobText.includes(sk.toLowerCase()));
   const skillMatch = freelancerSkills.length > 0
@@ -70,7 +70,7 @@ const SkeletonCard = () => (
 );
 
 /* ─── Standard JobCard ────────────────────────────────────────────────────── */
-const JobCard = ({ job, isSaved, onToggleSave, user }) => {
+const JobCard = ({ gig, isSaved, onToggleSave, user }) => {
   const statusConfig = {
     open: { cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-400' },
     in_progress: { cls: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20', dot: 'bg-indigo-400' },
@@ -139,7 +139,7 @@ const JobCard = ({ job, isSaved, onToggleSave, user }) => {
             </div>
           </div>
         </div>
-        <Link to={`/jobs/${job.job_id}`}
+        <Link to={`/gigs/${job.job_id}`}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 group/btn shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]">
           View Details
           <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
@@ -150,7 +150,7 @@ const JobCard = ({ job, isSaved, onToggleSave, user }) => {
 };
 
 /* ─── Recommended JobCard (richer layout) ────────────────────────────────── */
-const RecommendedJobCard = ({ job, isSaved, onToggleSave, user }) => {
+const RecommendedJobCard = ({ gig, isSaved, onToggleSave, user }) => {
   const { matchedSkills, finalScore } = job._rec;
   const matchPct = Math.round(finalScore * 100);
   const daysAgo = Math.floor((Date.now() - new Date(job.created_at)) / (1000 * 60 * 60 * 24));
@@ -242,7 +242,7 @@ const RecommendedJobCard = ({ job, isSaved, onToggleSave, user }) => {
             </div>
           </div>
         </div>
-        <Link to={`/jobs/${job.job_id}`}
+        <Link to={`/gigs/${job.job_id}`}
           className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 group/btn shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)]">
           View Details
           <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
@@ -309,20 +309,20 @@ const JobListPage = () => {
 
   const rankedJobs = useMemo(() => {
     if (!jobs.length) return [];
-    const scored = jobs.map(job => ({
-      ...job,
-      _rec: computeJobScore(job, freelancerSkills, freelancerRate, preferredCategory),
+    const scored = jobs.map(gig => ({
+      ...gig,
+      _rec: computeJobScore(gig, freelancerSkills, freelancerRate, preferredCategory),
     }));
     scored.sort((a, b) => b._rec.finalScore - a._rec.finalScore);
-    return scored.map((job, i) => ({
-      ...job,
+    return scored.map((gig, i) => ({
+      ...gig,
       _badge: i === 0 ? 'Best Match' : i < 4 ? 'Recommended' : null,
     }));
-  }, [jobs, freelancerSkills, freelancerRate, preferredCategory]);
+  }, [gigs, freelancerSkills, freelancerRate, preferredCategory]);
 
-  /* ─── Filtered jobs for "Latest" mode ──────────────────────────── */
+  /* ─── Filtered gigs for "Latest" mode ──────────────────────────── */
   const filteredJobs = useMemo(() => {
-    let data = [...jobs];
+    let data = [...gigs];
     if (filters.q) {
       const q = filters.q.toLowerCase();
       data = data.filter(j => j.title?.toLowerCase().includes(q) || j.description?.toLowerCase().includes(q));
@@ -339,7 +339,7 @@ const JobListPage = () => {
     else if (filters.sort === 'budget_low') data.sort((a, b) => a.budget - b.budget);
     else data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     return data;
-  }, [jobs, filters]);
+  }, [gigs, filters]);
 
   const toggleSave = async (jobId) => {
     setSavedJobs(prev => {
@@ -375,7 +375,7 @@ const JobListPage = () => {
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2 tracking-tight">Find Work</h1>
           <p className="text-slate-400 text-lg">
             {viewMode === 'foryou' && isFreelancer
-              ? `${rankedJobs.length} jobs ranked by match to your skills`
+              ? `${rankedJobs.length} gigs ranked by match to your skills`
               : `${filteredJobs.length} open opportunities`}
           </p>
         </div>
@@ -415,7 +415,7 @@ const JobListPage = () => {
           <div className="flex items-center gap-3 mb-6 p-3.5 rounded-2xl bg-violet-500/[0.07] border border-violet-500/20 animate-fade-up">
             <Sparkles className="w-4 h-4 text-violet-400 flex-shrink-0" />
             <p className="text-sm text-violet-300/80">
-              Jobs are ranked by how well they match your
+              Gigs are ranked by how well they match your
               {freelancerSkills.length > 0 && <span className="text-violet-300 font-semibold"> skills ({freelancerSkills.slice(0,3).join(', ')}{freelancerSkills.length > 3 ? '…' : ''})</span>},
               {preferredCategory && <span className="text-violet-300 font-semibold"> {preferredCategory} focus</span>},
               and hourly rate.
@@ -441,7 +441,7 @@ const JobListPage = () => {
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search by job title, skill, or keyword..."
+                placeholder="Search by gig title, skill, or keyword..."
                 value={filters.q}
                 onChange={e => updateFilter('q', e.target.value)}
                 className="w-full pl-14 pr-12 py-3.5 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-2xl text-[15px] text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all font-medium placeholder-slate-400 shadow-inner"
@@ -524,13 +524,13 @@ const JobListPage = () => {
             </aside>
           )}
 
-          {/* Job Grid */}
+          {/* Gig Grid */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm font-medium text-slate-400">
                 {viewMode === 'foryou'
-                  ? <><span className="text-white font-bold">{rankedJobs.length}</span> jobs ranked for you</>
-                  : <>Found <span className="text-white font-bold">{filteredJobs.length}</span> jobs</>}
+                  ? <><span className="text-white font-bold">{rankedJobs.length}</span> gigs ranked for you</>
+                  : <>Found <span className="text-white font-bold">{filteredJobs.length}</span> gigs</>}
               </p>
               <div className="flex items-center gap-2 text-slate-400 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
                 <LayoutGrid className="w-4 h-4" />
@@ -547,10 +547,10 @@ const JobListPage = () => {
                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
                   <Search className="w-8 h-8 text-slate-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">No jobs found</h3>
+                <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">No gigs found</h3>
                 <p className="text-slate-400 text-sm font-medium mb-8 max-w-sm mx-auto leading-relaxed">
                   {viewMode === 'foryou'
-                    ? 'No open jobs match your skills right now. Broaden your profile or check back soon.'
+                    ? 'No open gigs match your skills right now. Broaden your profile or check back soon.'
                     : "Try adjusting your filters."}
                 </p>
                 {viewMode === 'latest' && (
@@ -562,11 +562,11 @@ const JobListPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {displayJobs.map(job =>
+                {displayJobs.map(gig =>
                   viewMode === 'foryou' && isFreelancer ? (
                     <RecommendedJobCard
                       key={job.job_id}
-                      job={job}
+                      gig={gig}
                       user={user}
                       isSaved={savedJobs.has(job.job_id)}
                       onToggleSave={toggleSave}
@@ -574,7 +574,7 @@ const JobListPage = () => {
                   ) : (
                     <JobCard
                       key={job.job_id}
-                      job={job}
+                      gig={gig}
                       user={user}
                       isSaved={savedJobs.has(job.job_id)}
                       onToggleSave={toggleSave}

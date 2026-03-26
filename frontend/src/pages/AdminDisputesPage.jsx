@@ -114,7 +114,7 @@ export default function AdminDisputesPage() {
                   <span className={`w-2 h-2 rounded-full ${d.status === 'open' ? 'bg-red-400 animate-pulse' : 'bg-emerald-400'}`}></span>
                 </div>
                 <p className="text-sm font-bold text-white mb-1 truncate">{d.reason}</p>
-                <p className="text-xs text-white/40 font-medium">Job #{d.job_id} • Proj #{d.project_id}</p>
+                <p className="text-xs text-white/40 font-medium">Gig #{d.job_id} • Proj #{d.project_id}</p>
               </div>
             ))}
           </div>
@@ -158,7 +158,7 @@ export default function AdminDisputesPage() {
                        </div>
                        <ArrowRight size={14} className="text-white/30 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
                     </div>
-                    <p className="text-sm font-medium text-indigo-400 mt-2">View Full Job Description &rarr;</p>
+                    <p className="text-sm font-medium text-indigo-400 mt-2">View Full Gig Description &rarr;</p>
                  </Link>
                  
                  <Link to={`/projects/${selectedDispute.project_id}`} target="_blank" className="block p-5 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] transition-colors group cursor-pointer">

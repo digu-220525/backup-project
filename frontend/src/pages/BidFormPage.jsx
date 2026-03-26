@@ -104,7 +104,7 @@ const BidFormPage = () => {
             className="inline-flex items-center gap-2 text-sm font-semibold text-white/50 hover:text-white transition-colors mb-8 group"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Back to Job Details
+            Back to Gig Details
           </Link>
 
           <div className="grid lg:grid-cols-[1fr_300px] gap-6">
@@ -269,7 +269,7 @@ const BidFormPage = () => {
             {/* ════ SIDEBAR ════ */}
             <div className="space-y-5">
 
-              {/* Job Summary */}
+              {/* Gig Summary */}
               <div
                 className="bid-fade rounded-2xl p-5"
                 style={{
@@ -279,7 +279,7 @@ const BidFormPage = () => {
                   animationDelay: '.08s',
                 }}
               >
-                <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4">Job Summary</h3>
+                <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4">Gig Summary</h3>
                 <div className="space-y-3">
                   {[
                     { icon: <DollarSign size={15} className="text-emerald-400" />, label: 'Budget', value: `$${Number(job.budget).toLocaleString()}` },

@@ -123,7 +123,7 @@ const ProjectRow = ({ project, userRole }) => {
         </p>
         <div className="flex items-center gap-3">
           <p className="text-sm font-medium text-slate-400 truncate">
-            Job #{project.job_id}
+            Gig #{project.job_id}
           </p>
           {project.status === 'work_submitted' && (
             <span className="text-xs font-semibold text-amber-400 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-lg">
@@ -156,7 +156,7 @@ const ProjectRow = ({ project, userRole }) => {
 };
 
 /* ─── JobRow ─── */
-const JobRow = ({ job, hasNewBids, onDelete }) => (
+const JobRow = ({ gig, hasNewBids, onDelete }) => (
   <div className={`group flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl transition-all duration-300 relative text-left border ${
     hasNewBids ? 'bg-indigo-500/5 hover:bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] hover:bg-white/[0.04] border-white/[0.08] hover:border-white/[0.12]'
   }`}>
@@ -181,7 +181,7 @@ const JobRow = ({ job, hasNewBids, onDelete }) => (
     <div className="flex items-center gap-4 relative z-10">
       <Pill status={job.status} />
       <div className="flex items-center gap-2">
-        <Link to={`/jobs/${job.job_id}`} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-indigo-500 hover:text-white transition-all">
+        <Link to={`/gigs/${job.job_id}`} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-indigo-500 hover:text-white transition-all">
           <Eye size={18} />
         </Link>
         {job.status === 'completed' && (
@@ -196,7 +196,7 @@ const JobRow = ({ job, hasNewBids, onDelete }) => (
 
 /* ─── BidRow ─── */
 const BidRow = ({ bid }) => (
-  <Link to={`/jobs/${bid.job_id}`} 
+  <Link to={`/gigs/${bid.job_id}`} 
     className="group flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl transition-all duration-300 relative text-left bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.12]"
   >
     <div className="w-12 h-12 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shadow-inner flex-shrink-0 relative z-10">
@@ -205,7 +205,7 @@ const BidRow = ({ bid }) => (
     
     <div className="flex-1 min-w-0 relative z-10">
       <p className="text-base font-bold text-white mb-0.5 truncate group-hover:text-indigo-400 transition-colors">
-        Job #{bid.job_id}
+        Gig #{bid.job_id}
       </p>
       <p className="text-sm font-medium text-slate-400 truncate">
         ${Number(bid.bid_amount).toLocaleString()} &middot; {bid.proposal_text.substring(0, 40) + '...'}
@@ -269,7 +269,7 @@ const Dashboard = () => {
   }, [user]);
 
   const handleDeleteJob = async (id) => {
-    if (!window.confirm('Remove this job from your dashboard?')) return;
+    if (!window.confirm('Remove this gig from your dashboard?')) return;
     try {
       await api.patch(`/jobs/${id}`, { is_hidden_by_client: true });
       fetchData();
@@ -296,7 +296,7 @@ const Dashboard = () => {
     { icon: <CheckCircle />, label: 'Completed', value: completedProj.length, sub: completedProj.length ? 'All time stats' : null },
     { icon: <Star />, label: 'Avg Rating', value: avgRating ?? '—', sub: reviews.length ? `${reviews.length} reviews` : 'No reviews' },
   ] : [
-    { icon: <Briefcase />, label: 'Posted Jobs', value: items.length, sub: visibleJobs.filter(j => j.status === 'open').length + ' open' },
+    { icon: <Briefcase />, label: 'Posted Gigs', value: items.length, sub: visibleJobs.filter(j => j.status === 'open').length + ' open' },
     { icon: <Activity />, label: 'Active Projects', value: activeProjects.length, sub: urgentProjects.length ? `${urgentProjects.length} awaiting review` : null },
     { icon: <Users />, label: 'New Proposals', value: jobsWithBids.length, sub: jobsWithBids.length ? 'Action required' : null },
     { icon: <Star />, label: 'Avg Rating', value: avgRating ?? '—', sub: reviews.length ? `${reviews.length} reviews` : 'No reviews' },
@@ -340,7 +340,7 @@ const Dashboard = () => {
             
             <div className="flex shrink-0">
               {isFL ? (
-                <Link to="/jobs" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-white text-sm font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                <Link to="/gigs" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-white text-sm font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   style={{ background:'linear-gradient(135deg,#3b82f6,#6366f1)', boxShadow:'0 4px 18px rgba(59,130,246,0.35)' }}
                   onMouseEnter={e=>e.currentTarget.style.boxShadow='0 8px 28px rgba(59,130,246,0.5)'}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow='0 4px 18px rgba(59,130,246,0.35)'}
@@ -348,12 +348,12 @@ const Dashboard = () => {
                   <Search size={17} /> Find Work
                 </Link>
               ) : (
-                <Link to="/jobs/new" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-white font-bold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                <Link to="/gigs/new" className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-white font-bold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   style={{ background:'linear-gradient(135deg,#6366f1,#ec4899)', boxShadow:'0 4px 18px rgba(99,102,241,0.38)' }}
                   onMouseEnter={e=>e.currentTarget.style.boxShadow='0 8px 28px rgba(99,102,241,0.55)'}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow='0 4px 18px rgba(99,102,241,0.38)'}
                 >
-                  <Plus size={17} /> Post a Job
+                  <Plus size={17} /> Post a Gig
                 </Link>
               )}
             </div>
@@ -389,15 +389,15 @@ const Dashboard = () => {
                   <p className="text-xs font-black text-white/20 uppercase tracking-[0.2em] mb-4">Quick Navigation</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {(isFL ? [
-                      { label: 'Browse Jobs',    sub: 'Find new work', to: '/jobs',                   icon: <Search size={20} />,        color: 'from-blue-500/15 to-cyan-500/5',   border: 'border-blue-500/15',   text: 'text-blue-400' },
+                      { label: 'Browse Gigs',    sub: 'Find new work', to: '/gigs',                   icon: <Search size={20} />,        color: 'from-blue-500/15 to-cyan-500/5',   border: 'border-blue-500/15',   text: 'text-blue-400' },
                       { label: 'My Bids',        sub: `${items.length} proposal${items.length !== 1 ? 's' : ''} sent`, to: '/dashboard?tab=bids',  icon: <ClipboardList size={20} />, color: 'from-indigo-500/15 to-blue-500/5', border: 'border-indigo-500/15', text: 'text-indigo-400' },
                       { label: 'Projects',       sub: `${activeProjects.length} active`,              to: '/dashboard?tab=projects',     icon: <Briefcase size={20} />,     color: 'from-violet-500/15 to-purple-500/5', border: 'border-violet-500/15', text: 'text-violet-400' },
                       { label: 'Completed',      sub: `${completedProj.length} finished`,             to: '/dashboard?tab=completed',    icon: <CheckCircle size={20} />,   color: 'from-emerald-500/15 to-green-500/5', border: 'border-emerald-500/15', text: 'text-emerald-400' },
                       { label: 'Earnings',       sub: 'View payments',                                to: '/dashboard?tab=payments',     icon: <DollarSign size={20} />,    color: 'from-amber-500/15 to-yellow-500/5',  border: 'border-amber-500/15',  text: 'text-amber-400' },
                       { label: 'Profile',        sub: 'Edit your profile',                            to: `/profile/${user?.user_id}`,   icon: <Star size={20} />,          color: 'from-pink-500/15 to-rose-500/5',     border: 'border-pink-500/15',   text: 'text-pink-400' },
                     ] : [
-                      { label: 'Post a Job',     sub: 'Create a new listing',                         to: '/jobs/new',                   icon: <Plus size={20} />,          color: 'from-blue-500/15 to-cyan-500/5',     border: 'border-blue-500/15',   text: 'text-blue-400' },
-                      { label: 'Posted Jobs',    sub: `${visibleJobs.length} job${visibleJobs.length !== 1 ? 's' : ''}`, to: '/dashboard?tab=jobs', icon: <Briefcase size={20} />, color: 'from-indigo-500/15 to-blue-500/5', border: 'border-indigo-500/15', text: 'text-indigo-400' },
+                      { label: 'Post a Gig',     sub: 'Create a new listing',                         to: '/gigs/new',                   icon: <Plus size={20} />,          color: 'from-blue-500/15 to-cyan-500/5',     border: 'border-blue-500/15',   text: 'text-blue-400' },
+                      { label: 'Posted Gigs',    sub: `${visibleJobs.length} gig${visibleJobs.length !== 1 ? 's' : ''}`, to: '/dashboard?tab=gigs', icon: <Briefcase size={20} />, color: 'from-indigo-500/15 to-blue-500/5', border: 'border-indigo-500/15', text: 'text-indigo-400' },
                       { label: 'Proposals',      sub: `${jobsWithBids.length} with new bids`,        to: '/dashboard?tab=proposals',    icon: <MessageSquare size={20} />, color: 'from-violet-500/15 to-purple-500/5', border: 'border-violet-500/15', text: 'text-violet-400' },
                       { label: 'Projects',       sub: `${activeProjects.length} active`,              to: '/dashboard?tab=projects',     icon: <Activity size={20} />,      color: 'from-emerald-500/15 to-green-500/5', border: 'border-emerald-500/15', text: 'text-emerald-400' },
                       { label: 'Completed',      sub: `${completedProj.length} done`,                 to: '/dashboard?tab=completed',    icon: <CheckCircle size={20} />,   color: 'from-amber-500/15 to-yellow-500/5',  border: 'border-amber-500/15',  text: 'text-amber-400' },
@@ -428,33 +428,33 @@ const Dashboard = () => {
                   {loading ? (
                     <div className="space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} h={80} r={16} />)}</div>
                   ) : activeProjects.length === 0 ? (
-                    <EmptyState icon={<Briefcase />} title="No active projects" sub={isFL ? "Win a bid to start a project." : "Post a job and hire a freelancer."} action={isFL ? { to: '/jobs', label: 'Browse Jobs' } : { to: '/jobs/new', label: 'Post a Job' }} />
+                    <EmptyState icon={<Briefcase />} title="No active projects" sub={isFL ? "Win a bid to start a project." : "Post a gig and hire a freelancer."} action={isFL ? { to: '/gigs', label: 'Browse Gigs' } : { to: '/gigs/new', label: 'Post a Gig' }} />
                   ) : (
                     <div className="space-y-4">{activeProjects.map(p => <ProjectRow key={p.project_id} project={p} userRole={user.role} />)}</div>
                   )}
                 </div>
               )}
 
-              {/* BIDS/PROPOSALS TAB — freelancer: My Bids | client: Jobs with proposals */}
+              {/* BIDS/PROPOSALS TAB — freelancer: My Bids | client: Gigs with proposals */}
               {(activeTab === 'proposals' || activeTab === 'bids') && isFL && (
                 <div className="animate-fade-up bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-[32px] p-6 md:p-8">
                   <h3 className="text-xl font-bold text-white tracking-tight mb-8">My Proposals</h3>
                   {loading ? (
                     <div className="space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} h={80} r={16} />)}</div>
                   ) : items.length === 0 ? (
-                    <EmptyState icon={<DollarSign />} title="No proposals yet" sub="Find jobs and submit proposals to get started." action={{ to: '/jobs', label: 'Browse Jobs' }} />
+                    <EmptyState icon={<DollarSign />} title="No proposals yet" sub="Find gigs and submit proposals to get started." action={{ to: '/gigs', label: 'Browse Gigs' }} />
                   ) : (
                     <div className="space-y-4">{items.map(b => <BidRow key={b.bid_id} bid={b} />)}</div>
                   )}
                 </div>
               )}
 
-              {/* CLIENT PROPOSALS TAB — jobs that received bids */}
+              {/* CLIENT PROPOSALS TAB — gigs that received bids */}
               {activeTab === 'proposals' && !isFL && (
                 <div className="animate-fade-up bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-[32px] p-6 md:p-8">
                   <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-xl font-bold text-white tracking-tight">Jobs with Proposals</h3>
-                    <Link to="/jobs/new"
+                    <h3 className="text-xl font-bold text-white tracking-tight">Gigs with Proposals</h3>
+                    <Link to="/gigs/new"
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-all">
                       <Plus size={16} /> Post New
                     </Link>
@@ -465,21 +465,21 @@ const Dashboard = () => {
                     const jobsWithAnyBids = visibleJobs.filter(j => (j.bid_count || 0) > 0);
                     return jobsWithAnyBids.length === 0 ? (
                       <EmptyState icon={<Bell />} title="No proposals received yet"
-                        sub="Post jobs and wait for freelancers to submit proposals."
-                        action={{ to: '/jobs/new', label: 'Post a Job' }} />
+                        sub="Post gigs and wait for freelancers to submit proposals."
+                        action={{ to: '/gigs/new', label: 'Post a Gig' }} />
                     ) : (
                       <div className="space-y-4">
                         {jobsWithAnyBids.map(j => {
                           const bidsCount = j.bid_count || 0;
                           const unread = j.unread_bid_count || 0;
                           return (
-                            <Link key={j.job_id} to={`/jobs/${j.job_id}`}
+                            <Link key={j.job_id} to={`/gigs/${j.job_id}`}
                               className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.06] hover:border-white/[0.12] transition-all group">
                               <div className="w-11 h-11 rounded-[14px] bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 group-hover:scale-105 transition-transform">
                                 <Briefcase size={18} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-white truncate group-hover:text-indigo-300 transition-colors">{j.title || `Job #${j.job_id}`}</p>
+                                <p className="text-sm font-bold text-white truncate group-hover:text-indigo-300 transition-colors">{j.title || `Gig #${j.job_id}`}</p>
                                 <p className="text-xs text-slate-500 mt-0.5">${j.budget || 0} · {j.status}</p>
                               </div>
                               <div className="flex items-center gap-3 flex-shrink-0">
@@ -498,21 +498,21 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {/* JOBS TAB — accessible via sidebar 'My Jobs' link (?tab=jobs) */}
-              {activeTab === 'jobs' && !isFL && (
+              {/* GIGS TAB — accessible via sidebar 'My Gigs' link (?tab=gigs) */}
+              {activeTab === 'gigs' && !isFL && (
                 <div className="animate-fade-up bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-[32px] p-6 md:p-8">
                   <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-xl font-bold text-white tracking-tight">My Job Listings</h3>
-                    <Link to="/jobs/new" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-all">
+                    <h3 className="text-xl font-bold text-white tracking-tight">My Gig Listings</h3>
+                    <Link to="/gigs/new" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-all">
                       <Plus size={16} /> Post New
                     </Link>
                   </div>
                   {loading ? (
                     <div className="space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} h={80} r={16} />)}</div>
                   ) : visibleJobs.length === 0 ? (
-                    <EmptyState icon={<Briefcase />} title="No jobs posted yet" sub="Post your first job to start receiving proposals." action={{ to: '/jobs/new', label: 'Post a Job' }} />
+                    <EmptyState icon={<Briefcase />} title="No gigs posted yet" sub="Post your first gig to start receiving proposals." action={{ to: '/gigs/new', label: 'Post a Gig' }} />
                   ) : (
-                    <div className="space-y-4">{visibleJobs.map(j => <JobRow key={j.job_id} job={j} hasNewBids={j.unread_bid_count > 0} onDelete={handleDeleteJob} />)}</div>
+                    <div className="space-y-4">{visibleJobs.map(j => <JobRow key={j.job_id} gig={j} hasNewBids={j.unread_bid_count > 0} onDelete={handleDeleteJob} />)}</div>
                   )}
                 </div>
               )}
@@ -524,7 +524,7 @@ const Dashboard = () => {
                   {loading ? (
                     <div className="space-y-4">{[...Array(2)].map((_, i) => <Skeleton key={i} h={80} r={16} />)}</div>
                   ) : completedProj.length === 0 ? (
-                    <EmptyState icon={<Award />} title="No completed projects yet" sub="Your completed projects will appear here." action={{ to: '/jobs', label: 'Find Work' }} />
+                    <EmptyState icon={<Award />} title="No completed projects yet" sub="Your completed projects will appear here." action={{ to: '/gigs', label: 'Find Work' }} />
                   ) : (
                     <div className="space-y-4">
                       {completedProj.map(p => (
@@ -595,7 +595,7 @@ const Dashboard = () => {
                         </div>
                         <h4 className="text-lg font-bold text-white mb-2">No transactions yet</h4>
                         <p className="text-sm text-slate-400 max-w-xs">
-                          {isFL ? 'Complete projects to start earning.' : 'Post jobs and release payments to see history.'}
+                          {isFL ? 'Complete projects to start earning.' : 'Post gigs and release payments to see history.'}
                         </p>
                       </div>
                     ) : (

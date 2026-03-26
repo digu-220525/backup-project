@@ -69,7 +69,7 @@ const EscrowPaymentPage = () => {
     }
   };
 
-  if (!job && !success) return (
+  if (!gig && !success) return (
     <div className="min-h-screen flex items-center justify-center bg-[#070e1c]">
       <PageBackground variant="dark" />
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -124,7 +124,7 @@ const EscrowPaymentPage = () => {
             </div>
             <div>
               <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-                Job #{job.job_id}
+                Gig #{job.job_id}
               </p>
               <h1 className="text-2xl font-black text-white tracking-tight">Fund Escrow</h1>
             </div>
@@ -165,7 +165,7 @@ const EscrowPaymentPage = () => {
                     <div className="flex items-start gap-2.5">
                       <Info size={13} className="text-indigo-400/60 flex-shrink-0 mt-0.5" />
                       <p className="text-xs text-white/35 font-medium leading-relaxed">
-                        By funding, you agree to place <span className="text-indigo-400/70 font-bold">${budget.toFixed(2)}</span> into the secure Escrow system. The freelancer will be notified to begin the job immediately.
+                        By funding, you agree to place <span className="text-indigo-400/70 font-bold">${budget.toFixed(2)}</span> into the secure Escrow system. The freelancer will be notified to begin the gig immediately.
                       </p>
                     </div>
                   </div>

@@ -238,7 +238,7 @@ input[type=number] { -moz-appearance: textfield; }
         {/* Header */}
         <div className="mb-10 text-center sm:text-left">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-3 tracking-tight">
-            Saved Jobs
+            Saved Gigs
           </h1>
           <p className="text-slate-400 text-lg">
             Review your {jobs.length} bookmarked opportunities.
@@ -372,7 +372,7 @@ input[type=number] { -moz-appearance: textfield; }
             </aside>
           )}
 
-          {/* Job Grid */}
+          {/* Gig Grid */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-6 hidden lg:flex">
               <p className="text-sm font-medium text-slate-400">

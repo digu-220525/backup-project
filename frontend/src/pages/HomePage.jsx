@@ -7,14 +7,14 @@ import {
 } from 'lucide-react';
 
 const CATEGORIES = [
-  { icon: '💻', label: 'Web Development', count: '1.2k+ jobs' },
-  { icon: '🎨', label: 'UI/UX Design', count: '850+ jobs' },
-  { icon: '📱', label: 'Mobile Apps', count: '640+ jobs' },
-  { icon: '🤖', label: 'AI & Machine Learning', count: '420+ jobs' },
-  { icon: '📊', label: 'Data Science', count: '380+ jobs' },
-  { icon: '✍️', label: 'Content Writing', count: '920+ jobs' },
-  { icon: '📣', label: 'Digital Marketing', count: '710+ jobs' },
-  { icon: '🔒', label: 'Cybersecurity', count: '290+ jobs' },
+  { icon: '💻', label: 'Web Development', count: '1.2k+ gigs' },
+  { icon: '🎨', label: 'UI/UX Design', count: '850+ gigs' },
+  { icon: '📱', label: 'Mobile Apps', count: '640+ gigs' },
+  { icon: '🤖', label: 'AI & Machine Learning', count: '420+ gigs' },
+  { icon: '📊', label: 'Data Science', count: '380+ gigs' },
+  { icon: '✍️', label: 'Content Writing', count: '920+ gigs' },
+  { icon: '📣', label: 'Digital Marketing', count: '710+ gigs' },
+  { icon: '🔒', label: 'Cybersecurity', count: '290+ gigs' },
 ];
 
 const TESTIMONIALS = [
@@ -37,7 +37,7 @@ const TESTIMONIALS = [
 
 const STATS = [
   { value: '50K+', label: 'Freelancers', icon: <Users className="w-5 h-5" /> },
-  { value: '12K+', label: 'Jobs Posted', icon: <Briefcase className="w-5 h-5" /> },
+  { value: '12K+', label: 'Gigs Posted', icon: <Briefcase className="w-5 h-5" /> },
   { value: '$8M+', label: 'Paid Out', icon: <TrendingUp className="w-5 h-5" /> },
   { value: '120+', label: 'Countries', icon: <Globe className="w-5 h-5" /> },
 ];
@@ -206,7 +206,7 @@ const HomePage = () => {
                   <input
                     name="q"
                     type="text"
-                    placeholder="Search for any skill or job title..."
+                    placeholder="Search for any skill or gig title..."
                     className="w-full bg-transparent text-slate-800 placeholder-slate-400 text-base font-medium outline-none py-4"
                   />
                 </div>
@@ -262,13 +262,13 @@ const HomePage = () => {
                   </Link>
 
                   {/* Secondary — glass pill */}
-                  <Link to="/jobs"
+                  <Link to="/gigs"
                     className="group relative inline-flex items-center gap-3 text-white font-bold px-8 py-4 rounded-full text-lg overflow-hidden transition-all duration-300 backdrop-blur-md active:scale-95 hover:bg-white/10 hover:-translate-y-1 border border-white/20"
                     style={{
                       background: 'rgba(255,255,255,0.05)',
                       boxShadow: '0 4px 15px -3px rgba(0,0,0,0.2)',
                     }}>
-                    <span className="relative z-10">Browse Jobs</span>
+                    <span className="relative z-10">Browse Gigs</span>
                   </Link>
                 </>
               )}
@@ -339,7 +339,7 @@ const HomePage = () => {
             ))}
           </div>
           <div className="text-center mt-10">
-            <Link to="/jobs" className="inline-flex items-center gap-2.5 text-white/50 font-semibold text-base hover:text-white transition-all group">
+            <Link to="/gigs" className="inline-flex items-center gap-2.5 text-white/50 font-semibold text-base hover:text-white transition-all group">
               View all categories <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -415,7 +415,7 @@ const HomePage = () => {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-300" />
                 </span>
               </Link>
-              <Link to="/jobs"
+              <Link to="/gigs"
                 className="group relative inline-flex items-center gap-3 text-white font-bold px-9 py-4 rounded-full text-base overflow-hidden transition-all duration-300 active:scale-[0.97] backdrop-blur-md"
                 style={{
                   background: 'rgba(255,255,255,0.07)',
@@ -423,7 +423,7 @@ const HomePage = () => {
                 }}>
                 <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none"
                   style={{ background: 'rgba(255,255,255,0.05)', boxShadow: '0 0 0 1px rgba(255,255,255,0.3)' }} />
-                <span className="relative z-10">Browse Jobs</span>
+                <span className="relative z-10">Browse Gigs</span>
               </Link>
             </div>
           </div>
@@ -473,7 +473,7 @@ const HomePage = () => {
               </div>
               <div className="space-y-7">
                 {[
-                  { step: '01', title: 'Post a Job', desc: 'Define your project goals and requirements in minutes.' },
+                  { step: '01', title: 'Post a Gig', desc: 'Define your project goals and requirements in minutes.' },
                   { step: '02', title: 'Select Talent', desc: 'Choose from a curated pool of vetted professionals.' },
                   { step: '03', title: 'Secure Payments', desc: 'Funds held in escrow until work is complete.' },
                 ].map((item) => (
@@ -517,7 +517,7 @@ const HomePage = () => {
               <div className="space-y-7">
                 {[
                   { step: '01', title: 'Create Profile', desc: 'Showcase your skills and professional experience.' },
-                  { step: '02', title: 'Apply for Jobs', desc: 'Find projects that match your expertise perfectly.' },
+                  { step: '02', title: 'Apply for Gigs', desc: 'Find projects that match your expertise perfectly.' },
                   { step: '03', title: 'Get Paid', desc: 'Complete work and receive secure, fast payments.' },
                 ].map((item) => (
                   <div key={item.step} className="flex gap-5 group/item">
@@ -651,7 +651,7 @@ const HomePage = () => {
                 background: 'radial-gradient(ellipse at 50% 50%, rgba(99,102,241,0.20) 0%, rgba(59,130,246,0.10) 35%, transparent 70%)'
               }}/>
 
-              {/* ── MOCKUP PANEL 1 — top left: Client posting a job ── */}
+              {/* ── MOCKUP PANEL 1 — top left: Client posting a gig ── */}
               <div className="absolute top-8 left-0 w-64 animate-float"
                 style={{
                   background: 'rgba(5,12,40,0.92)', backdropFilter: 'blur(28px)',
@@ -1028,7 +1028,7 @@ const HomePage = () => {
             </Link>
 
             {/* Secondary — frosted glass */}
-            <Link to="/jobs"
+            <Link to="/gigs"
               className="group relative inline-flex items-center gap-3 text-white/80 font-bold px-11 py-4 rounded-full text-lg overflow-hidden transition-all duration-300 active:scale-[0.97] backdrop-blur-md hover:text-white"
               style={{
                 background: 'rgba(255,255,255,0.08)',
@@ -1036,7 +1036,7 @@ const HomePage = () => {
               }}>
               <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none"
                 style={{ background: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0 1px rgba(255,255,255,0.35)' }} />
-              <span className="relative z-10">Browse Jobs</span>
+              <span className="relative z-10">Browse Gigs</span>
             </Link>
           </div>
         </div>
@@ -1140,7 +1140,7 @@ const HomePage = () => {
             <div>
               <h4 className="text-white/60 font-bold mb-5 text-sm uppercase tracking-widest">For Clients</h4>
               <ul className="space-y-3 text-white/40 text-sm">
-                <li><Link to="/jobs/new" className="hover:text-blue-300 transition-colors font-medium">Post a Job</Link></li>
+                <li><Link to="/gigs/new" className="hover:text-blue-300 transition-colors font-medium">Post a Gig</Link></li>
                 {(!user || user.role === 'client') && <li><Link to="/freelancers" className="hover:text-blue-300 transition-colors font-medium">Find Talent</Link></li>}
                 <li><a href="#" className="hover:text-blue-300 transition-colors font-medium">Enterprise</a></li>
               </ul>
@@ -1148,7 +1148,7 @@ const HomePage = () => {
             <div>
               <h4 className="text-white/60 font-bold mb-5 text-sm uppercase tracking-widest">For Talent</h4>
               <ul className="space-y-3 text-white/40 text-sm">
-                <li><Link to="/jobs" className="hover:text-blue-300 transition-colors font-medium">Browse Projects</Link></li>
+                <li><Link to="/gigs" className="hover:text-blue-300 transition-colors font-medium">Browse Projects</Link></li>
                 <li><Link to="/signup" className="hover:text-blue-300 transition-colors font-medium">Create Profile</Link></li>
                 <li><a href="#" className="hover:text-blue-300 transition-colors font-medium">Success Stories</a></li>
               </ul>

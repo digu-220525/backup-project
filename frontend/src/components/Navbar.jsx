@@ -81,7 +81,7 @@ const Navbar = () => {
                     : 'text-white/45 hover:text-white hover:bg-white/[0.04]'
                 }`}
               >
-                Browse Jobs
+                Browse Gigs
               </Link>
             )}
             {user?.role === 'client' && (
@@ -217,14 +217,14 @@ const Navbar = () => {
               {user ? (
                 <>
                   {user.role === 'freelancer' && (
-                    <Link to="/jobs" className="px-5 py-3.5 text-[10px] font-black text-white/35 uppercase tracking-[0.25em] hover:bg-white/[0.04] hover:text-white rounded-2xl transition-all" onClick={() => setMenuOpen(false)}>Browse Jobs</Link>
+                    <Link to="/jobs" className="px-5 py-3.5 text-[10px] font-black text-white/35 uppercase tracking-[0.25em] hover:bg-white/[0.04] hover:text-white rounded-2xl transition-all" onClick={() => setMenuOpen(false)}>Browse Gigs</Link>
                   )}
                   {user.role === 'client' && (
                     <Link to="/freelancers" className="px-5 py-3.5 text-[10px] font-black text-white/35 uppercase tracking-[0.25em] hover:bg-white/[0.04] hover:text-white rounded-2xl transition-all" onClick={() => setMenuOpen(false)}>Freelancers</Link>
                   )}
                   <Link to="/dashboard" className="px-5 py-3.5 text-[10px] font-black text-white/35 uppercase tracking-[0.25em] hover:bg-white/[0.04] hover:text-white rounded-2xl transition-all" onClick={() => setMenuOpen(false)}>Dashboard</Link>
                   {user.role === 'client' && (
-                    <Link to="/jobs/new" className="mx-3 my-1.5 px-5 py-3.5 text-[10px] font-black bg-white text-slate-950 rounded-2xl uppercase tracking-[0.25em] text-center" onClick={() => setMenuOpen(false)}>Post a Job</Link>
+                    <Link to="/jobs/new" className="mx-3 my-1.5 px-5 py-3.5 text-[10px] font-black bg-white text-slate-950 rounded-2xl uppercase tracking-[0.25em] text-center" onClick={() => setMenuOpen(false)}>Post a Gig</Link>
                   )}
                   <button onClick={handleLogout} className="px-5 py-3.5 text-[10px] font-black text-red-400/50 uppercase tracking-[0.18em] hover:text-red-400 rounded-2xl text-left transition-all">Sign Out</button>
                 </>

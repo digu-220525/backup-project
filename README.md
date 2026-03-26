@@ -131,6 +131,11 @@ cd backend
 python migrate_to_postgres.py
 ```
 
+### 3. Sharing via Cloud vs Local Presentation
+Nexlance supports dynamically switching between databases by editing your `backend/.env` file:
+* **For Local Presentation (Speed):** Use the `localhost` PostgreSQL setting so there is zero network latency during your live demos.
+* **For Team Sharing (Collaboration):** Comment out the local URL and uncomment the Neon Cloud database URL before sending the `.env` file to your group so you all share the same live platform data.
+
 ---
 
 ## 🐳 Docker Deployment (Recommended)

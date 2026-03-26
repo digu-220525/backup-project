@@ -267,7 +267,7 @@ const PaymentPage = () => {
 
               <div className="space-y-3 mb-5">
                 {[
-                  { label: 'Job', value: job?.title || `Job #${project?.job_id}` },
+                  { label: 'Gig', value: job?.title || `Gig #${project?.job_id}` },
                   { label: 'Contract budget', value: `$${budget.toFixed(2)}` },
                   { label: 'Platform fee', value: 'Free', highlight: 'text-emerald-400' },
                 ].map(row => (
