@@ -32,7 +32,7 @@ const CATEGORY_KEYWORDS = [
 ];
 
 /* ─── Recommendation Algorithm ───────────────────────────────────────────── */
-const computeJobScore = (gig, freelancerSkills, freelancerRate, preferredCategory) => {
+const computeJobScore = (job, freelancerSkills, freelancerRate, preferredCategory) => {
   const jobText = `${job.title || ''} ${job.description || ''} ${job.category || ''}`.toLowerCase();
   const matchedSkills = freelancerSkills.filter(sk => jobText.includes(sk.toLowerCase()));
   const skillMatch = freelancerSkills.length > 0
@@ -70,7 +70,7 @@ const SkeletonCard = () => (
 );
 
 /* ─── Standard JobCard ────────────────────────────────────────────────────── */
-const JobCard = ({ gig, isSaved, onToggleSave, user }) => {
+const JobCard = ({ job, isSaved, onToggleSave, user }) => {
   const statusConfig = {
     open: { cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-400' },
     in_progress: { cls: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20', dot: 'bg-indigo-400' },
@@ -150,7 +150,7 @@ const JobCard = ({ gig, isSaved, onToggleSave, user }) => {
 };
 
 /* ─── Recommended JobCard (richer layout) ────────────────────────────────── */
-const RecommendedJobCard = ({ gig, isSaved, onToggleSave, user }) => {
+const RecommendedJobCard = ({ job, isSaved, onToggleSave, user }) => {
   const { matchedSkills, finalScore } = job._rec;
   const matchPct = Math.round(finalScore * 100);
   const daysAgo = Math.floor((Date.now() - new Date(job.created_at)) / (1000 * 60 * 60 * 24));
@@ -309,20 +309,20 @@ const JobListPage = () => {
 
   const rankedJobs = useMemo(() => {
     if (!jobs.length) return [];
-    const scored = jobs.map(gig => ({
-      ...gig,
-      _rec: computeJobScore(gig, freelancerSkills, freelancerRate, preferredCategory),
+    const scored = jobs.map(job => ({
+      ...job,
+      _rec: computeJobScore(job, freelancerSkills, freelancerRate, preferredCategory),
     }));
     scored.sort((a, b) => b._rec.finalScore - a._rec.finalScore);
-    return scored.map((gig, i) => ({
-      ...gig,
+    return scored.map((job, i) => ({
+      ...job,
       _badge: i === 0 ? 'Best Match' : i < 4 ? 'Recommended' : null,
     }));
-  }, [gigs, freelancerSkills, freelancerRate, preferredCategory]);
+  }, [jobs, freelancerSkills, freelancerRate, preferredCategory]);
 
   /* ─── Filtered gigs for "Latest" mode ──────────────────────────── */
   const filteredJobs = useMemo(() => {
-    let data = [...gigs];
+    let data = [...jobs];
     if (filters.q) {
       const q = filters.q.toLowerCase();
       data = data.filter(j => j.title?.toLowerCase().includes(q) || j.description?.toLowerCase().includes(q));
@@ -339,7 +339,7 @@ const JobListPage = () => {
     else if (filters.sort === 'budget_low') data.sort((a, b) => a.budget - b.budget);
     else data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     return data;
-  }, [gigs, filters]);
+  }, [jobs, filters]);
 
   const toggleSave = async (jobId) => {
     setSavedJobs(prev => {
@@ -562,11 +562,11 @@ const JobListPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {displayJobs.map(gig =>
+                {displayJobs.map(job =>
                   viewMode === 'foryou' && isFreelancer ? (
                     <RecommendedJobCard
                       key={job.job_id}
-                      gig={gig}
+                      job={job}
                       user={user}
                       isSaved={savedJobs.has(job.job_id)}
                       onToggleSave={toggleSave}
@@ -574,7 +574,7 @@ const JobListPage = () => {
                   ) : (
                     <JobCard
                       key={job.job_id}
-                      gig={gig}
+                      job={job}
                       user={user}
                       isSaved={savedJobs.has(job.job_id)}
                       onToggleSave={toggleSave}

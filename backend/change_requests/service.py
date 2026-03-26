@@ -96,7 +96,7 @@ async def freelancer_respond(
         await create_notification(db, NotificationCreate(
             user_id=cr.client_id,
             title="Change Request Accepted",
-            message=f"Freelancer accepted your change request. Please deposit ${cr.extra_amount} to proceed.",
+            message="Please deposit extra payment to proceed with changes.",
             link=f"/projects/{cr.project_id}",
         ))
     else:

@@ -156,7 +156,7 @@ const ProjectRow = ({ project, userRole }) => {
 };
 
 /* ─── JobRow ─── */
-const JobRow = ({ gig, hasNewBids, onDelete }) => (
+const JobRow = ({ job, hasNewBids, onDelete }) => (
   <div className={`group flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl transition-all duration-300 relative text-left border ${
     hasNewBids ? 'bg-indigo-500/5 hover:bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] hover:bg-white/[0.04] border-white/[0.08] hover:border-white/[0.12]'
   }`}>
@@ -512,7 +512,7 @@ const Dashboard = () => {
                   ) : visibleJobs.length === 0 ? (
                     <EmptyState icon={<Briefcase />} title="No gigs posted yet" sub="Post your first gig to start receiving proposals." action={{ to: '/gigs/new', label: 'Post a Gig' }} />
                   ) : (
-                    <div className="space-y-4">{visibleJobs.map(j => <JobRow key={j.job_id} gig={j} hasNewBids={j.unread_bid_count > 0} onDelete={handleDeleteJob} />)}</div>
+                    <div className="space-y-4">{visibleJobs.map(j => <JobRow key={j.job_id} job={j} hasNewBids={j.unread_bid_count > 0} onDelete={handleDeleteJob} />)}</div>
                   )}
                 </div>
               )}

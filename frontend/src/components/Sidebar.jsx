@@ -63,7 +63,7 @@ const Sidebar = () => {
     { icon: <MessageSquare  size={ICON} />, label: 'Messages',    to: '/messages' },
     { section: 'Work' },
     { icon: <Plus           size={ICON} />, label: 'Post Gig',    to: '/jobs/new' },
-    { icon: <Briefcase      size={ICON} />, label: 'Posted Gigs', to: '/dashboard?tab=jobs' },
+    { icon: <Briefcase      size={ICON} />, label: 'Posted Gigs', to: '/dashboard?tab=gigs' },
     { icon: <ClipboardList  size={ICON} />, label: 'Proposals',   to: '/dashboard?tab=proposals' },
     { icon: <Activity       size={ICON} />, label: 'Projects',    to: '/dashboard?tab=projects' },
     { icon: <CheckCircle    size={ICON} />, label: 'Completed',   to: '/dashboard?tab=completed' },

@@ -27,12 +27,18 @@ from uploads_router import router as upload_router
 
 
 # ── Lifespan: runs once at startup/shutdown ───────────────────────────────────
+from scheduler import check_deadlines_and_reminders
+import asyncio
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create database tables automatically on first run."""
     await create_tables()
+    # Start the background task
+    task = asyncio.create_task(check_deadlines_and_reminders())
     yield  # app runs here
     # shutdown logic can go below if needed
+    task.cancel()
 
 
 # ── Application instance ──────────────────────────────────────────────────────

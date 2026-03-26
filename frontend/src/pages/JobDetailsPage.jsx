@@ -312,7 +312,7 @@ const JobDetailsPage = () => {
     </div>
   );
 
-  if (!gig) return (
+  if (!job) return (
     <div className="min-h-screen pt-24 relative flex items-center justify-center bg-[#070e1c]">
       <div className="text-center">
         <AlertTriangle className="w-12 h-12 text-white/30 mx-auto mb-4" />

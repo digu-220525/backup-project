@@ -181,3 +181,38 @@ pytest ../tests/ -v
 |-------|---------|
 - **Architecture Guide**: [docs/architecture.md](docs/architecture.md)
 - **GitHub Workflow**: [docs/github_workflow.md](docs/github_workflow.md)
+
+---
+
+## 👥 Team Module Assignments
+
+### 1. Digu (Member 1)
+**Core Focus:** Review & Rating System | Payment & Escrow System | Disputes & Counter Bids
+- **Backend:** `/backend/reviews/`, `/backend/payments/`, `/backend/change_requests/`
+- **Frontend:** `/frontend/src/pages/ReviewPage.jsx`, `/frontend/src/pages/PaymentPage.jsx`, `/frontend/src/pages/EscrowPaymentPage.jsx`, `/frontend/src/pages/AdminDisputesPage.jsx`, `/frontend/src/components/ReviewCard.jsx`
+
+### 2. Poojita (Member 2)
+**Core Focus:** User Auth | Registration | Profile Creation | Core UI Layout
+- **Backend:** `/backend/auth/`
+- **Frontend:** `/frontend/src/pages/LoginPage.jsx`, `/frontend/src/pages/SignupPage.jsx`, `/frontend/src/pages/ProfilePage.jsx`, `/frontend/src/context/AuthContext.jsx`, `/frontend/src/pages/HomePage.jsx`, `/frontend/src/pages/Dashboard.jsx`, `/frontend/src/pages/FreelancersPage.jsx`, `/frontend/src/components/Navbar.jsx`, `/frontend/src/components/Navbar.css`, `/frontend/src/components/PageBackground.jsx`, `/frontend/src/services/api.js`, `/frontend/src/App.jsx`
+
+### 3. Alekhya (Member 3)
+**Core Focus:** Client Proposal Review | Freelancer Proposal Submission | AI Gig Recommendations
+- **Backend:** `/backend/bids/`
+- **Frontend:** `/frontend/src/pages/BidFormPage.jsx`, `/frontend/src/components/BidCard.jsx`
+
+### 4. Harshita (Member 4)
+**Core Focus:** Project Infrastructure | DevOps | Notifications | Support Tickets | Saved Gigs
+- **Backend Core:** `/backend/notifications/`, `/backend/support/`, `/backend/main.py`, `/backend/config.py`, `/backend/database.py`, `/backend/migrate_to_postgres.py`, `/backend/alter_tables.py`, `/backend/Dockerfile`, `/backend/requirements.txt`, `/backend/.env`
+- **Frontend Core:** `/frontend/src/context/NotificationContext.jsx`, `/frontend/src/pages/SavedJobsPage.jsx`, `/frontend/src/main.jsx`, `/frontend/src/index.css`, `/frontend/vite.config.js`, `/frontend/tailwind.config.js`, `/frontend/postcss.config.js`, `/frontend/Dockerfile`, `/frontend/package.json`, `/frontend/package-lock.json`, `/frontend/index.html`
+- **Shared Docs:** `/database/schema.sql`, `/docs/`, `/tests/`, `PRD.md`, `README.md`, `docker-compose.yml`, `.gitignore`
+
+### 5. Pallavi (Member 5)
+**Core Focus:** Project Work Submission | Messaging System | File & Image Uploads
+- **Backend:** `/backend/projects/`, `/backend/messages/`, `/backend/uploads/`, `/backend/uploads_router.py`
+- **Frontend:** `/frontend/src/pages/SubmitWorkPage.jsx`, `/frontend/src/pages/ProjectDashboard.jsx`, `/frontend/src/pages/MessagesPage.jsx`, `/frontend/src/pages/InboxPage.jsx`
+
+### 6. Shekhar (Member 6)
+**Core Focus:** Gig Listing | Gig Posting | Application Sidebar Engine
+- **Backend:** `/backend/jobs/`, `/backend/test_get_jobs.py`
+- **Frontend:** `/frontend/src/pages/JobListPage.jsx`, `/frontend/src/pages/JobDetailsPage.jsx`, `/frontend/src/pages/NewJobPage.jsx`, `/frontend/src/components/JobCard.jsx`, `/frontend/src/components/Sidebar.jsx`

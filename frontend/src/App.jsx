@@ -59,6 +59,10 @@ const App = () => {
          <Route path="/jobs/new" element={<ProtectedRoute><NewJobPage /></ProtectedRoute>} />
          <Route path="/jobs/:id" element={<ProtectedRoute><JobDetailsPage /></ProtectedRoute>} />
          <Route path="/jobs/:id/bid" element={<ProtectedRoute><BidFormPage /></ProtectedRoute>} />
+         <Route path="/gigs" element={<ProtectedRoute><JobListPage /></ProtectedRoute>} />
+         <Route path="/gigs/new" element={<ProtectedRoute><NewJobPage /></ProtectedRoute>} />
+         <Route path="/gigs/:id" element={<ProtectedRoute><JobDetailsPage /></ProtectedRoute>} />
+         <Route path="/gigs/:id/bid" element={<ProtectedRoute><BidFormPage /></ProtectedRoute>} />
          <Route path="/saved-jobs" element={<ProtectedRoute><SavedJobsPage /></ProtectedRoute>} />
          <Route path="/freelancers" element={<ProtectedRoute><FreelancersPage /></ProtectedRoute>} />
          <Route path="/profile/:id" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

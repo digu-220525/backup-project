@@ -97,7 +97,7 @@ async def submit_work(db: AsyncSession, project_id: int, submission: WorkSubmiss
     await create_notification(db, NotificationCreate(
         user_id=project.client_id,
         title="Work Submitted",
-        message=f"Operative has submitted work for Mission #{project.project_id}. Review required.",
+        message="Freelancer has submitted the work. Please review and approve.",
         link=f"/projects/{project.project_id}"
     ))
 
@@ -164,7 +164,7 @@ async def request_changes(db: AsyncSession, project_id: int, client_id: int):
     await create_notification(db, NotificationCreate(
         user_id=project.freelancer_id,
         title="Changes Requested",
-        message=f"The client has reviewed Mission #{project.project_id} and is requesting revisions.",
+        message="Client requested changes. Please review and respond.",
         link=f"/projects/{project.project_id}"
     ))
 
@@ -198,13 +198,13 @@ async def raise_dispute(db: AsyncSession, project_id: int, user_id: int, dispute
     await db.commit()
     await db.refresh(db_dispute)
     
-    # Notify other party
-    other_party = project.freelancer_id if user_id == project.client_id else project.client_id
-    await create_notification(db, NotificationCreate(
-        user_id=other_party,
-        title="Dispute Raised",
-        message=f"A dispute was raised for Mission #{project.project_id}. Operations halted.",
-        link=f"/projects/{project.project_id}"
-    ))
+    # Notify both client and freelancer
+    for party_id in [project.client_id, project.freelancer_id]:
+        await create_notification(db, NotificationCreate(
+            user_id=party_id,
+            title="Dispute Raised",
+            message="A dispute was raised for this project. Operations halted.",
+            link=f"/projects/{project.project_id}"
+        ))
     
     return project

@@ -69,7 +69,7 @@ const EscrowPaymentPage = () => {
     }
   };
 
-  if (!gig && !success) return (
+  if (!job && !success) return (
     <div className="min-h-screen flex items-center justify-center bg-[#070e1c]">
       <PageBackground variant="dark" />
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
